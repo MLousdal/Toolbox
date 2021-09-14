@@ -1,30 +1,45 @@
-USE [1086118]
+USE [1086088]
 GO
 -- will use prefix 'toolbox' to all table names
 
 -- ### ### ### ### this part was originally loginDB
 
--- *** *** *** ***
--- dropping constraints and tables (reset)
--- *** *** *** ***
+-- --------------------------------------------
+-- --Dropping constraints and tables (reset) --
+-- --------------------------------------------
 
--- Drop constraint if it already exists
 -- Table: toolboxPassword
 -- Constraint: FK_toolboxPassword_toolboxUser
 ALTER TABLE dbo.toolboxPassword
 DROP CONSTRAINT IF EXISTS FK_toolboxPassword_toolboxUser
 GO
--- Drop the table if it already exists
--- Table: toolboxPassword
-DROP TABLE IF EXISTS dbo.toolboxPassword
-GO
 
--- Drop constraint if it already exists
 -- Table: toolboxUser
 -- Constraint: FK_toolboxUser_toolboxRole
 ALTER TABLE dbo.toolboxUser
 DROP CONSTRAINT IF EXISTS FK_toolboxUser_toolboxRole
 GO
+
+-- Drop the table if it already exists
+-- Table: toolboxPassword
+DROP TABLE IF EXISTS dbo.toolboxPassword
+GO
+
+-- Table: toolboxUser
+-- Constraint: FK_toolboxUser_toolboxRole
+ALTER TABLE dbo.toolboxTool
+DROP CONSTRAINT IF EXISTS FK_user_tool
+GO
+
+ALTER TABLE dbo.toolboxTool
+DROP CONSTRAINT IF EXISTS FK_category_tool
+GO
+
+
+
+
+
+
 -- Drop the table if it already exists
 -- Table: toolboxUser
 DROP TABLE IF EXISTS dbo.toolboxUser
@@ -36,15 +51,6 @@ DROP TABLE if EXISTS dbo.toolboxRole
 GO
 
 
--- Drop constraint if it already exists
--- Table: toolboxUser
--- Constraint: FK_toolboxUser_toolboxRole
-ALTER TABLE dbo.toolboxTool
-DROP CONSTRAINT IF EXISTS FK_user_tool
-GO
-ALTER TABLE dbo.toolboxTool
-DROP CONSTRAINT IF EXISTS FK_category_tool
-GO
 
 -- Drop the table if it already exists
 -- Table: toolboxRole
@@ -92,31 +98,6 @@ GO
 -- end of: creating tables
 
 
--- *** *** *** ***
--- populating tables with test data for 'toolbox - workshop part 2'
--- *** *** *** ***
-INSERT INTO toolboxRole
-    ([roleName], [roleDescription])
-VALUES
-    ('admin', 'can do whatever'),
-    ('member', 'can do stuff that is allowed')
-GO
-
--- admin@admin.com, password: admin
--- member@member.com, password: member
-INSERT INTO toolboxUser
-    ([userName], [userEmail], [FK_roleid])
-VALUES
-    ('admin', 'admin@admin.com', 1),
-    ('member', 'member@member.com', 2)
-GO
-
-INSERT INTO toolboxPassword
-    ([passwordValue], [FK_userId])
-VALUES
-    ('admin', 1),
-    ('member', 2)
-GO
 -- end of: populating tables with test data
 
 -- *** *** *** ***
@@ -180,34 +161,63 @@ GO
 -- Populating the DB with test data
 -- --------------------------------
 
+-- Role
+INSERT INTO toolboxRole
+    (roleName, roleDescription)
+VALUES
+    ('admin', 'can do whatever'),
+    ('member', 'can do stuff that is allowed')
+GO
+
+-- User
+-- User INFO:
+-- admin@admin.com, password: admin
+-- member@member.com, password: member
+
+INSERT INTO toolboxUser
+    (userName, userEmail, FK_roleid)
+VALUES
+    ('admin', 'admin@admin.com', 1),
+    ('member', 'member@member.com', 2)
+GO
+
+-- Password
+INSERT INTO toolboxPassword
+    (passwordValue, FK_userId)
+VALUES
+    ('admin', 1),
+    ('member', 2)
+GO
+
 -- Tools
-INSERT INTO toolboxTool
-    ([title],[content],[link], [FK_userid], [FK_categoryid])
-VALUES
-    ("Type Scale", "A tool to have better scales between font sizes", "https://type-scale.com/", 1, 1),
-    ("React", "JavaScript framework :)", "https://reactjs.org/", 1, 3)
-GO
--- Categories
-INSERT INTO toolboxCategory
-    ([categoryid], [category])
-VALUES
-    ("design"),
-    ("userExperience"),
-    ("frontend"),
-    ("backend")
-GO
+-- INSERT INTO toolboxTool
+--     (title, content, link, FK_userid, FK_categoryid)
+-- VALUES
+--     ("Type Scale", "A tool to have better scales between font sizes", "https://type-scale.com/", 1, 1),
+--     ("React", "JavaScript framework :)", "https://reactjs.org/", 1, 3)
+-- GO
+
+-- -- Categories
+-- INSERT INTO toolboxCategory
+--     (categoryid, category)
+-- VALUES
+--     (1 ,"design"),
+--     (2, "userExperience"),
+--     (3, "frontend"),
+--     (4, "backend")
+-- GO
 
 -- --------------------------------
 -- ------ End of test data --------
 -- --------------------------------
 
--- *** *** *** ***
--- quick test
--- *** *** *** ***
-SELECT *
-FROM toolboxTool
-GO
+-- ----------------------
+-- ---- Quick Test ------
+-- ----------------------
+-- SELECT *
+-- FROM toolboxTool
+-- GO
 
-SELECT *
-FROM toolboxCategory
-GO
+-- SELECT *
+-- FROM toolboxCategory
+-- GO
