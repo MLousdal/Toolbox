@@ -1,7 +1,7 @@
 @use "../base/variables" as *;
 
 .box {
-    background-color: var(--foreground-color);
+    background-color: var(--background-color);
     padding: $spacing-s;
     margin: $spacing-m 0;
     box-shadow: $shadow-normal var(--shadow);

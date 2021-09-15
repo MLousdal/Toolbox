@@ -1,0 +1,20 @@
+@use "../base/variables" as *;
+
+.btn {
+  background-color: var(--color-primary-faded);
+  color: var(--foreground-color);
+  padding: $spacing-xs $spacing-s;
+  min-width: 5em;
+  text-align: center;
+  
+}
+.btn.active {
+  background-color: var(--color-primary);
+}
+
+.btn-container {
+  display: flex;
+  gap: $spacing-s;
+  padding-bottom: $spacing-s;
+  overflow-x: scroll;
+}

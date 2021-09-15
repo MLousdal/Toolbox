@@ -1,13 +1,12 @@
 @use "./reset/reset";
-@use "./base/variables" as *;
+@use "./base/variables";
 @use "./base/html";
 @use "./base/utility";
 @use "./base/topography";
 @use "./layout/hero";
-// @use "./modules/arrow";
-// @use "./modules/icons";
-// @use "./modules/themeToggle";
-// @use "./modules/wave";
-// @use "./modules/links";
+@use "./layout/navbar";
+@use "./layout/toolbox";
+@use "./modules/btns";
+@use "./modules/arrow";
 @use "./themes/dark";
 @use "./themes/light";

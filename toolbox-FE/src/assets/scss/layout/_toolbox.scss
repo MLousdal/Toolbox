@@ -1,0 +1,29 @@
+@use "../base/variables" as *;
+
+
+.toolbox {
+  padding-block: min(10vh, #{$spacing-l});
+  
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-s;
+    
+    .tool {
+      background-color: var(--foreground-color);
+      padding: $spacing-m;
+    }
+  }
+}
+
+@media (max-width: 1150px) {
+  .toolbox .tools {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .toolbox .tools {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
