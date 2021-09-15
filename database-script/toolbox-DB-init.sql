@@ -1,9 +1,18 @@
 USE [1086088]
 GO
--- will use prefix 'toolbox' to all table names
+-- --------------------------------------------
+-- --- TIPS AND TRICKS / THINGS TO REMEMBER ---
+-- --------------------------------------------
 
--- ### ### ### ### this part was originally loginDB
+-- 1. You can't refer/reference something that hasen't been created yet. Like with INSERT'ing content into Tool, you need have 
+--    the Categories created before using them in INSERT INTO toolboxTool. Like with referencing a FK, you need to have the tabel where th PK is before you can find it.
 
+-- 2. If you have something with NOT NULL, you have to make sure to give the data when doing things like INSERT INTO. Otherwise you can get an error like:
+--    Msg 515, Level 16, State 2, Line 169
+--    Cannot insert the value NULL into column 'FK_categoryId', table '1086088.dbo.toolboxTool'; column does not allow nulls. INSERT fails.
+
+-- Information
+-- Prefix to be used: toolbox.
 -- --------------------------------------------
 -- --Dropping constraints and tables (reset) --
 -- --------------------------------------------
@@ -26,14 +35,16 @@ ALTER TABLE toolboxTool
 DROP CONSTRAINT IF EXISTS FK_toolboxUser_toolboxTool
 GO
 
+-- Table: toolboxUser
+-- Constraint: FK_toolboxCategory_toolboxTool
 ALTER TABLE toolboxTool
 DROP CONSTRAINT IF EXISTS FK_toolboxCategory_toolboxTool
 GO
+-- ALTER TABLES: DONE
 
-
--- -----------------------
--- Dropping TABLE --
--- -----------------------
+-- ----------------------
+-- --- Dropping TABLE ---
+-- ----------------------
 
 -- Table: toolboxUser
 DROP TABLE IF EXISTS toolboxUser
@@ -54,17 +65,19 @@ GO
 -- Table: toolboxPassword
 DROP TABLE IF EXISTS toolboxPassword
 GO
+-- DROP TABLES: DONE
 
--- end of: dropping constraints and tables
+-- -----------------------
+-- ---- Create Tables ----
+-- -----------------------
+-- Table of Contents:
+    -- 1. toolboxRole
+    -- 2. toolboxUser
+    -- 3. toolboxCategory
+    -- 4. toolboxPassword
+    -- 5. toolboxTool
 
-
--- Create Tables
-    -- toolboxRole
-    -- toolboxUser
-    -- toolboxCategory
-    -- toolboxPassword
-    -- Table: toolboxTool
-
+-- Create #1
 CREATE TABLE toolboxRole
 (
     roleId INT NOT NULL IDENTITY PRIMARY KEY,
@@ -73,6 +86,7 @@ CREATE TABLE toolboxRole
 )
 GO
 
+-- Create #2
 CREATE TABLE toolboxUser
 (
     userId INT NOT NULL IDENTITY PRIMARY KEY,
@@ -83,6 +97,8 @@ CREATE TABLE toolboxUser
     CONSTRAINT FK_toolboxUser_toolboxRole FOREIGN KEY (FK_roleid) REFERENCES toolboxRole (roleid)
 )
 GO
+
+-- Create #3
 CREATE TABLE toolboxCategory
 (
     categoryId INT NOT NULL IDENTITY PRIMARY KEY,
@@ -90,6 +106,7 @@ CREATE TABLE toolboxCategory
 );
 GO
 
+-- Create #4
 CREATE TABLE toolboxPassword
 (
     passwordValue NVARCHAR(255) NOT NULL,
@@ -100,6 +117,7 @@ CREATE TABLE toolboxPassword
 
 GO
 
+-- Create #5
 CREATE TABLE toolboxTool
 (
     toolId INT NOT NULL IDENTITY PRIMARY KEY,
@@ -113,13 +131,13 @@ CREATE TABLE toolboxTool
     CONSTRAINT FK_toolboxCategory_toolboxTool FOREIGN KEY (FK_categoryId) REFERENCES toolboxCategory (categoryId)
 );
 GO
+-- CREATE TABLES: DONE
 
+-- ----------------------------------------
+-- --- Populating the DB with test data ---
+-- ----------------------------------------
 
--- --------------------------------
--- Populating the DB with test data
--- --------------------------------
-
--- Role
+-- Roles
 INSERT INTO toolboxRole
     ([roleName], [roleDescription])
 VALUES
@@ -127,16 +145,22 @@ VALUES
     ('Member', 'Can do most stuff!')
 GO
 
--- User
--- User INFO:
--- admin@admin.com, password: admin
--- member@member.com, password: member
-
+-- Users
 INSERT INTO toolboxUser
     ([userName], [userEmail], [FK_roleId])
 VALUES
     ('Admin', 'admin@admin.com', 1),
     ('Member', 'member@member.com', 2)
+GO
+
+-- Categories
+INSERT INTO toolboxCategory
+    ([categoryValue])
+VALUES
+    ('Design'),
+    ('UserExperience'),
+    ('FrontEnd'),
+    ('BackEnd')
 GO
 
 -- Password
@@ -148,51 +172,36 @@ VALUES
 GO
 
 -- Tools
--- INSERT INTO toolboxTool
---     ([toolTitle], [toolContent], [toolLink], [FK_userId], [FK_categoryId])
--- VALUES
---     ('Type Scale', 'A tool to have better scales between font sizes', 'https://type-scale.com/', 1, 1),
---     ('React', 'JavaScript framework :)', 'https://reactjs.org/', 1, 3)
--- GO
--- INSERT INTO toolboxTool
---     ([toolTitle])
--- VALUES
-    -- ("Type Scale", "A tool to have better scales between font sizes", "https://type-scale.com/", 1, 1),
-    -- ("Figma", "Figma connects everyone in the design process so teams can deliver better products, faster.", "https://www.figma.com/", 1, 1),
-    -- ("Web AIM: Contrast Checker", "Check if the color contrast passes accessibility standards.", "https://webaim.org/resources/contrastchecker/", 1, 1),
-    -- ("Unsplash", "The internet’s source of freely-usable images. Powered by creators everywhere.", "https://unsplash.com/", 1, 1),
-    -- ("Coverr", "Beautiful Free Stock Video Footage", "https://coverr.co/", 1, 1),
-    -- ("Open Doodles", "A Free Set of Open-Source Illustrations!", "https://opendoodles.com/", 1, 1),
-    -- ("GlooMaps", "https://www.gloomaps.com/", "https://www.gloomaps.com/", 1, 2),
-    -- ("UXMISFITS", "A great blog for learning UX", "https://uxmisfit.com/", 1, 2),
-    -- ("Growth design", "Get product tips in a comic book format you’ll love to read.", "https://growth.design/", 1, 2),
-    -- ("Miro", "The online collaborative whiteboard platform to bring teams together, anytime, anywhere.", "https://miro.com/", 1, 2),
-    -- ("Hotjar", "Understand how users behave on your site, what they need, and how they feel, fast.", "https://www.hotjar.com/", 1, 2),
-    -- -- ("", "", "", 1, 2), need 1 more ux tool
-    -- ("SASS", "CSS with superpowers", "https://sass-lang.com/", 1, 3),
-    -- ("Parcel", "Parcel is a compiler for all your code, regardless of the language or toolchain.", "https://v2.parceljs.org/", 1, 3),
-    -- ("Squoosh", "Super good image compressor", "https://squoosh.app/", 1, 3),
-    -- ("Animate.css", "Just-add-water CSS animations", "https://animate.style/", 1, 3),
-    -- ("Brumm", "Make a smooth shadow, friend.", "https://shadows.brumm.af/", 1, 3),
-    -- ("React", "JavaScript framework :)", "https://reactjs.org/", 1, 3),
-    -- ("Strapi", "Strapi is the leading open-source headless CMS.", "https://strapi.io/", 1, 4),
-    -- ("Huggingface: Datasets", "Datasets is a library for easily accessing and sharing datasets.", "https://huggingface.co/docs/datasets/", 1, 4),
-    -- ("Lucidchart", "Lucidchart is the intelligent diagramming application that brings teams together.", "https://www.lucidchart.com/pages/", 1, 4),
-    -- ("QuickRef.ME", "Here are some cheatsheets and quick references contributed by open source angels.", "https://quickref.me/", 1, 4),
-    -- ("Swagger", "Swagger takes the manual work out of API documentation.", "https://swagger.io/", 1, 4),
-    -- ("Public APIs", "A collective list of free APIs for use in software and web development", "https://github.com/public-apis/public-apis", 1, 4)
-
--- GO
-
--- Categories
-INSERT INTO toolboxCategory
-    ([categoryValue])
+INSERT INTO toolboxTool
+    ([toolTitle], [toolContent], [toolLink], [FK_userId], [FK_categoryId])
 VALUES
-    ('Design'),
-    ('UserExperience'),
-    ('FrontEnd'),
-    ('BackEnd')
+    ('Type Scale', 'A tool to have better scales between font sizes', 'https://type-scale.com/', 1, 1),
+    ('Figma', 'Figma connects everyone in the design process so teams can deliver better products, faster.', 'https://www.figma.com/', 1, 1),
+    ('Web AIM: Contrast Checker', 'Check if the color contrast passes accessibility standards.', 'https://webaim.org/resources/contrastchecker/', 1, 1),
+    ('Unsplash', 'The internet’s source of freely-usable images. Powered by creators everywhere.', 'https://unsplash.com/', 1, 1),
+    ('Coverr', 'Beautiful Free Stock Video Footage', 'https://coverr.co/', 1, 1),
+    ('Open Doodles', 'A Free Set of Open-Source Illustrations!', 'https://opendoodles.com/', 1, 1),
+    ('GlooMaps', 'https://www.gloomaps.com/', 'https://www.gloomaps.com/', 1, 2),
+    ('UXMISFITS', 'A great blog for learning UX', 'https://uxmisfit.com/', 1, 2),
+    ('Growth design', 'Get product tips in a comic book format you’ll love to read.', 'https://growth.design/', 1, 2),
+    ('Miro', 'The online collaborative whiteboard platform to bring teams together, anytime, anywhere.', 'https://miro.com/', 1, 2),
+    ('Hotjar', 'Understand how users behave on your site, what they need, and how they feel, fast.', 'https://www.hotjar.com/', 1, 2),
+    -- ('', '', '', 1, 2), need 1 more ux tool
+    ('SASS', 'CSS with superpowers', 'https://sass-lang.com/', 1, 3),
+    ('Parcel', 'Parcel is a compiler for all your code, regardless of the language or toolchain.', 'https://v2.parceljs.org/', 1, 3),
+    ('Squoosh', 'Super good image compressor', 'https://squoosh.app/', 1, 3),
+    ('Animate.css', 'Just-add-water CSS animations', 'https://animate.style/', 1, 3),
+    ('Brumm', 'Make a smooth shadow, friend.', 'https://shadows.brumm.af/', 1, 3),
+    ('React', 'JavaScript framework :)', 'https://reactjs.org/', 1, 3),
+    ('Strapi', 'Strapi is the leading open-source headless CMS.', 'https://strapi.io/', 1, 4),
+    ('Huggingface: Datasets', 'Datasets is a library for easily accessing and sharing datasets.', 'https://huggingface.co/docs/datasets/', 1, 4),
+    ('Lucidchart', 'Lucidchart is the intelligent diagramming application that brings teams together.', 'https://www.lucidchart.com/pages/', 1, 4),
+    ('QuickRef.ME', 'Here are some cheatsheets and quick references contributed by open source angels.', 'https://quickref.me/', 1, 4),
+    ('Swagger', 'Swagger takes the manual work out of API documentation.', 'https://swagger.io/', 1, 4),
+    ('Public APIs', 'A collective list of free APIs for use in software and web development', 'https://github.com/public-apis/public-apis', 1, 4)
+
 GO
+
 
 -- --------------------------------
 -- ------ End of test data --------
