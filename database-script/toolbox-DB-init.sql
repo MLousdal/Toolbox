@@ -61,8 +61,9 @@ GO
 -- Create Tables
     -- toolboxRole
     -- toolboxUser
-    -- toolboxPassword
     -- toolboxCategory
+    -- toolboxPassword
+    -- Table: toolboxTool
 
 CREATE TABLE toolboxRole
 (
@@ -82,7 +83,6 @@ CREATE TABLE toolboxUser
     CONSTRAINT FK_toolboxUser_toolboxRole FOREIGN KEY (FK_roleid) REFERENCES toolboxRole (roleid)
 )
 GO
--- Table: toolboxTool
 CREATE TABLE toolboxCategory
 (
     categoryId INT NOT NULL IDENTITY PRIMARY KEY,
@@ -99,7 +99,7 @@ CREATE TABLE toolboxPassword
 )
 
 GO
--- Table: toolboxTool
+
 CREATE TABLE toolboxTool
 (
     toolId INT NOT NULL IDENTITY PRIMARY KEY,
