@@ -11,12 +11,10 @@ GO
 --    Msg 515, Level 16, State 2, Line 169
 --    Cannot insert the value NULL into column 'FK_categoryId', table '1086088.dbo.toolboxTool'; column does not allow nulls. INSERT fails.
 
--- ---------------------------------
--- -- Prefix to be used: toolbox. --
--- ---------------------------------
-
+-- Information
+-- Prefix to be used: toolbox.
 -- --------------------------------------------
--- --Dropping constraints and tables (RESET) --
+-- --Dropping constraints and tables (reset) --
 -- --------------------------------------------
 
 -- Table: toolboxPassword
@@ -128,6 +126,7 @@ CREATE TABLE toolboxTool
     toolContent NVARCHAR(128) NOT NULL,
     toolLink NVARCHAR(255) NOT NULL,
     toolStatus NVARCHAR(50) NOT NULL,
+
     FK_userId INT NOT NULL,
     FK_categoryId INT NOT NULL,
 
@@ -190,7 +189,7 @@ VALUES
     ('Growth design', 'Get product tips in a comic book format you’ll love to read.', 'https://growth.design/', 'active', 1, 2),
     ('Miro', 'The online collaborative whiteboard platform to bring teams together, anytime, anywhere.', 'https://miro.com/', 'active', 1, 2),
     ('Hotjar', 'Understand how users behave on your site, what they need, and how they feel, fast.', 'https://www.hotjar.com/', 'active', 1, 2),
-    -- ('', '', '', 1, 2), need 1 more ux tool
+    ('Persona', 'One platform, all the building blocks you need to create the ideal experience', 'https://withpersona.com/', 1, 2), need 1 more ux tool
     ('SASS', 'CSS with superpowers', 'https://sass-lang.com/', 'active', 1, 3),
     ('Parcel', 'Parcel is a compiler for all your code, regardless of the language or toolchain.', 'https://v2.parceljs.org/', 'active', 1, 3),
     ('Squoosh', 'Super good image compressor', 'https://squoosh.app/', 'active', 1, 3),
@@ -208,6 +207,7 @@ GO
 
 -- --------------------------------
 -- ------ End of Test Data --------
+
 -- --------------------------------
 
 -- ----------------------
