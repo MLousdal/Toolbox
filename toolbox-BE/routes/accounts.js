@@ -34,6 +34,9 @@ const secret = config.get('jwt_secret_key');
 // ---------------------------------------------------------
 
 
+//------------------------POST-------------------------------
+
+//          POST /api/accounts/login (LOGIN)
 
 // previously '/'
 router.post('/login', async (req, res) => {
@@ -63,6 +66,9 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
+//          POST /api/accounts (SIGNUP)
+
 // previously '/signup'
 router.post('/', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -86,5 +92,15 @@ router.post('/', async (req, res) => {
         return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
     }
 });
+
+//------------------------PUT-------------------------------
+
+
+//------------------------GET-------------------------------
+
+
+
+
+
 
 module.exports = router;
