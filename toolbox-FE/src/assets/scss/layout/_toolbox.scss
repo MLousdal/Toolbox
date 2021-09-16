@@ -3,16 +3,45 @@
 
 .toolbox {
   padding-block: min(10vh, #{$spacing-l});
+  display: flex; 
+  flex-direction: column;
+  flex-wrap: no-wrap;
+  justify-content: flex-start;
+  gap: $spacing-xs;
   
+  input[type="radio"] {
+    display: none;
+  }
+
   .tools {
-    display: grid;
+    display: none;
+    width: 100%;
     grid-template-columns: repeat(3, 1fr);
     gap: $spacing-s;
+    order: 1;
     
     .tool {
       background-color: var(--foreground-color);
       padding: $spacing-m;
+      border-radius: $border-radius;
+
+      p {
+        margin-top: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
     }
+  }
+
+  input[type="radio"]:checked + label {
+    background-color: var(--color-primary);
+  }
+
+  input[type="radio"]:checked + label + .tools {
+    display: grid;
   }
 }
 

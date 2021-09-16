@@ -2,19 +2,29 @@
 
 .btn {
   background-color: var(--color-primary-faded);
+  font-size: small;
+  font-weight: 700;
+  text-transform: lowercase;
   color: var(--foreground-color);
   padding: $spacing-xs $spacing-s;
-  min-width: 5em;
   text-align: center;
-  
+  transition: background-color 0.2s ease;
+  min-width: 5em;
+  cursor: pointer;
+  border-radius: $border-radius;
 }
-.btn.active {
+
+.active {
   background-color: var(--color-primary);
 }
 
 .btn-container {
   display: flex;
-  gap: $spacing-s;
-  padding-bottom: $spacing-s;
-  overflow-x: scroll;
+  gap: $spacing-xs;
+}
+
+@media (max-width: 500px) {
+  .btn-container {
+    overflow-x: scroll;
+  }
 }

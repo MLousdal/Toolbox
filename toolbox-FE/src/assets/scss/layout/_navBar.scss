@@ -32,26 +32,14 @@ nav {
         font-weight: 700;
     }
 
-    .nav-btn {
-        cursor: default;
-        pointer-events: none;
-        display: none;
-    }
-
-    .nav-btn img,
     .nav-logo {
         width: $spacing-m;
         height: $spacing-m;
         margin: $spacing-xs $spacing-s;
     }
 
-    .nav-logo {
-        font-size: 1.3333rem;
-        font-weight: 900;
-        font-family: "Lato", sans-serif;
+    .nav-logo:hover, .nav-logo:focus {
+        filter: var(--filter);
     }
 
-    #nav-links {
-        margin: 0;
-    }
 }

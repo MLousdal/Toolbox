@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Toolbox</title>
+    <meta name="description" content="The place to find the webtools for your web need, when creating your amazing websites!">
+    <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
+    <link rel="stylesheet" href="assets/scss/main.scss">
+    <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32" />
+    <script src="assets/js/index.js" defer="true" type="module"></script>
+</head>
+<body class="theme-light">
+    <nav>
+        <a href="index.html">
+            <img src="assets/images/favicon-32x32.png" alt="logo" class="nav-logo">
+        </a>
+        <ul id="nav-links">
+          <li><a href="mypage.html" class="underline">my page</a></li>
+            <li><a href="forms.html" class="underline">login / signup</a></li>
+        </ul>
+    </nav>
+    <main class="forms">
+      <div class="btn-container">
+        <input type="radio" id="login" name="tabs" checked="checked" />
+        <label for="login" class="btn">login</label>
+        <input type="radio" id="signup" name="tabs" />
+        <label for="signup" class="btn">signup</label>
+      </div>
+      <form class="login">
+        <label for="Lusername"
+          >username:
+          <input type="text" id="Lusername" name="login" required />
+        </label>
+        <label for="Lpassword"
+          >password:
+          <input type="password" id="Lpassword" name="login" required />
+        </label>
+        <hr>
+        <button class="btn active" id="loginSubmit">login</button>
+      </form>
+      <form class="signup">
+        <label for="SUemail"
+          >email: <input type="email" id="SUemail" name="signup" required
+        /></label>
+        <label for="SUusername"
+          >username:
+          <input type="text" id="SUusername" name="signup" required />
+        </label>
+        <label for="SUpassword"
+          >password:
+          <input type="password" id="SUpassword" name="signup" required />
+        </label>
+        <hr>
+        <button class="btn active" id="signupSubmit">signup</button>
+      </form>
+    </main>
+  </body>
+</html>
