@@ -15,29 +15,26 @@ const secret = config.get('jwt_secret_key');
 
 
 // ---------------------------------------------------------
+// ----------------- TABLE OF CONTENTS ---------------------
+// ---------------------------------------------------------
 // POST
-
 // /api/accounts
 // /api/accounts/login
 
 // PUT
-
 // /api/accounts/:accountId
+// /api/accounts/delete/me
+// /api/accounts/delete/:accountId
 
 // GET
-
 // /api/accounts
 // /api/accounts/me
 // /api/accounts/:accountId
-
-
 // ---------------------------------------------------------
-
 
 //------------------------POST-------------------------------
 
 //          POST /api/accounts/login (LOGIN)
-
 // previously '/'
 router.post('/login', async (req, res) => {
     // res.setHeader('Content-Type', 'application/json');
@@ -68,7 +65,6 @@ router.post('/login', async (req, res) => {
 
 
 //          POST /api/accounts (SIGNUP)
-
 // previously '/signup'
 router.post('/', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -94,10 +90,149 @@ router.post('/', async (req, res) => {
 });
 
 //------------------------PUT-------------------------------
+// ----- (MEMBER) UPDATE own account
+router.put('/me', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Account.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
+    const payloadValidate = Account.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Account.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+// ----- (ADMIN) UPDATE account
+router.put('/:accountid', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Account.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+
+    const payloadValidate = Account.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Account.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+// ----- (MEMBER) "DELETE" own account
+router.put('/delete/me', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Account.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+
+    const payloadValidate = Account.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Account.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+// ----- (ADMIN) "DELETE" any account
+router.put('/delete/:accountid', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Account.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+
+    const payloadValidate = Account.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Account.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
 
 //------------------------GET-------------------------------
+// ----- (ADMIN) ALL accounts
+router.get('/', async (req, res) => {
+    // need to call the Tool class for DB access...
+    let authorid;
+    if (req.query.author) {
+        authorid = parseInt(req.query.author);
+        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+    }
 
+    try {
+        const tools = await Account.readAll(authorid);
+        return res.send(JSON.stringify(tools));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+// ----- (MEMBER) OWN account
+router.get('/me', async (req, res) => {
+    // need to call the Tool class for DB access...
+    let authorid;
+    if (req.query.author) {
+        authorid = parseInt(req.query.author);
+        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+    }
+
+    try {
+        const tools = await Account.readAll(authorid);
+        return res.send(JSON.stringify(tools));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+// ----- (ADMIN) A specific account
+router.get('/me', async (req, res) => {
+    // need to call the Tool class for DB access...
+    let authorid;
+    if (req.query.author) {
+        authorid = parseInt(req.query.author);
+        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+    }
+
+    try {
+        const tools = await Account.readAll(authorid);
+        return res.send(JSON.stringify(tools));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
 
 
 
