@@ -27,15 +27,16 @@ nav {
         color: inherit;
         border-radius: var(--border-radius);
     }
-
+    
     .active {
         font-weight: 700;
     }
-
+    
     .nav-logo {
+        vertical-align: bottom;
         width: $spacing-m;
         height: $spacing-m;
-        margin: $spacing-xs $spacing-s;
+        margin: $spacing-s $spacing-s;
     }
 
     .nav-logo:hover, .nav-logo:focus {

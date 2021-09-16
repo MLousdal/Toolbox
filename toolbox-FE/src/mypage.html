@@ -1,23 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Toolbox</title>
-    <meta name="description" content="The place to find the webtools for your web need, when creating your amazing websites!">
-    <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
-    <link rel="stylesheet" href="assets/scss/main.scss">
-    <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32" />
+    <meta
+      name="description"
+      content="The place to find the webtools for your web need, when creating your amazing websites!"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1 minimum-scale=1"
+    />
+    <link rel="stylesheet" href="assets/scss/main.scss" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="assets/images/favicon-32x32.png"
+      sizes="32x32"
+    />
     <script src="assets/js/index.js" defer="true" type="module"></script>
-</head>
-<body class="theme-light">
+  </head>
+  <body class="theme-light">
     <nav>
-        <a href="index.html">
-            <img src="assets/images/favicon-32x32.png" alt="logo" class="nav-logo">
-        </a>
-        <ul id="nav-links">
-          <li><a href="mypage.html" class="underline">my page</a></li>
-            <li><a href="forms.html" class="underline">login / signup</a></li>
-        </ul>
+      <a href="index.html">
+        <img src="assets/images/logo.png" alt="logo" class="nav-logo" />
+      </a>
+      <ul id="nav-links">
+        <li><a href="mypage.html" class="underline">my page</a></li>
+        <li><a href="forms.html" class="underline">login / signup</a></li>
+      </ul>
     </nav>
-</body>
+    <main class="wrapper myPage">
+      <section class="box" id="myTools">
+        <h2>[user's] page</h2>
+          <section>
+            <h3>Submitted tools:</h3>
+            <div class="tools">
+              <article class="tool">
+                <h4>Google fonts</h4>
+                <p>Google fonts is for finding fonts for your project that requires fontsGoogle fonts is for finding fonts for your project that requires fonts</p>
+                <a href="#">visit tool..</a>
+            </article>
+            <article class="tool">
+                <h4>Google fonts</h4>
+                <p>Google fonts is for finding fonts for your project that requires fonts</p>
+                <a href="#">visit tool..</a>
+            </article>
+            <article class="tool">
+                <h4>Google fonts</h4>
+                <p>Google fonts is for finding fonts for your project that requires fonts</p>
+                <a href="#">visit tool..</a>
+            </article>
+            <article class="tool">
+                <h4>Google fonts</h4>
+                <p>Google fonts is for finding fonts for your project that requires fonts</p>
+                <a href="#">visit tool..</a>
+            </article>
+            </div>
+          </section>
+      </section>
+      <section id="myPageForms">
+        <form id="submitTool">
+          <h3>Submit a new tool:</h3>
+          <label for="STtitel">title: 
+            <input type="text" id="STtitel" name="submitTool" required>
+          </label>
+          <label for="STdesc">description:
+            <textarea id="STdesc" name="submitTool" rows="3" required></textarea>
+          </label>
+          <label for="STlink">link: 
+            <input type="text" id="STlink" name="submitTool" required>
+          </label>
+          <label for="STcategory">link: 
+            <select name="submitTool" id="STcategory" required>
+              <option value="">--Please choose a category --</option>
+              <option value="design">Design</option>
+              <option value="UX">UX</option>
+              <option value="frontend">frontend</option>
+              <option value="backend">backend</option>
+          </select>
+          </label>
+          <hr>
+          <button class="btn active" id="newToolSubmit">submit</button>
+        </form>
+        <form id="updateTool">
+          <h3>Update [toolName]</h3>
+          <label for="STtitel">title: 
+            <input type="text" id="STtitel" name="updateTool" required>
+          </label>
+          <label for="STdesc">description:
+            <textarea id="STdesc" name="updateTool" rows="3" required></textarea>
+          </label>
+          <label for="STlink">link: 
+            <input type="text" id="STlink" name="updateTool" required>
+          </label>
+          <label for="STcategory">link: 
+            <select name="updateTool" id="STcategory" required>
+              <option value="">--Please choose a category --</option>
+              <option value="design">Design</option>
+              <option value="UX">UX</option>
+              <option value="frontend">frontend</option>
+              <option value="backend">backend</option>
+          </select>
+          </label>
+          <hr>
+          <button class="btn active" id="updateToolSubmit">submit</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

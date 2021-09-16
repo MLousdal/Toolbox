@@ -12,6 +12,7 @@
   input[type="radio"] {
     display: none;
   }
+}
 
   .tools {
     display: none;
@@ -24,6 +25,8 @@
       background-color: var(--foreground-color);
       padding: $spacing-m;
       border-radius: $border-radius;
+      max-width: 20em;
+      border: 1px solid var(--font-color);
 
       p {
         margin-top: auto;
@@ -34,7 +37,6 @@
         -webkit-box-orient: vertical;
       }
     }
-  }
 
   input[type="radio"]:checked + label {
     background-color: var(--color-primary);

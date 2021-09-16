@@ -1,0 +1,58 @@
+@use "../base/variables" as *;
+
+.myPage {
+  min-height: calc(100vh - 65px);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) auto;
+  grid-auto-flow: dense;
+  align-items: flex-start;
+  gap: $spacing-m;
+  margin: $spacing-m auto;
+
+  #myTools {
+    grid-column: 1 / span 2;
+    padding: $spacing-m;
+    
+    .tools {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  #submitTool, #updateTool {
+    display: flex;
+    flex: 1 1 0px;
+    box-sizing: border-box;
+    max-width: none;
+  }
+
+  #myPageForms {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-m;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .myPage {
+    grid-template-columns: 1fr 1fr;
+    #myPageForms {
+      grid-column: 1 / span 2;
+      flex-direction: row-reverse;
+      flex-wrap: wrap;
+    }
+    }
+}
+
+@media (max-width: 765px) {
+  .myPage {
+    grid-template-columns: 1fr;
+    #myPageForms {
+      grid-column: 1;
+      flex-direction: column;
+    }
+    #myTools {
+      grid-column: 1;
+    }
+  }
+}
