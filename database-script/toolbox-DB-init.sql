@@ -11,10 +11,12 @@ GO
 --    Msg 515, Level 16, State 2, Line 169
 --    Cannot insert the value NULL into column 'FK_categoryId', table '1086088.dbo.toolboxTool'; column does not allow nulls. INSERT fails.
 
--- Information
--- Prefix to be used: toolbox.
+-- ---------------------------------
+-- -- Prefix to be used: toolbox. --
+-- ---------------------------------
+
 -- --------------------------------------------
--- --Dropping constraints and tables (reset) --
+-- --Dropping constraints and tables (RESET) --
 -- --------------------------------------------
 
 -- Table: toolboxPassword
@@ -29,13 +31,13 @@ ALTER TABLE toolboxUser
 DROP CONSTRAINT IF EXISTS FK_toolboxUser_toolboxRole
 GO
 
--- Table: toolboxUser
--- Constraint: FK_toolboxUser_toolboxRole
+-- Table: toolboxTool
+-- Constraint: FK_toolboxUser_toolboxTool
 ALTER TABLE toolboxTool
 DROP CONSTRAINT IF EXISTS FK_toolboxUser_toolboxTool
 GO
 
--- Table: toolboxUser
+-- Table: toolboxTool
 -- Constraint: FK_toolboxCategory_toolboxTool
 ALTER TABLE toolboxTool
 DROP CONSTRAINT IF EXISTS FK_toolboxCategory_toolboxTool
@@ -92,6 +94,7 @@ CREATE TABLE toolboxUser
     userId INT NOT NULL IDENTITY PRIMARY KEY,
     userName NVARCHAR(50) NOT NULL,
     userEmail NVARCHAR(255) NOT NULL,
+    userStatus NVARCHAR(50) NOT NULL,
     FK_roleId INT NOT NULL,
 
     CONSTRAINT FK_toolboxUser_toolboxRole FOREIGN KEY (FK_roleid) REFERENCES toolboxRole (roleid)
@@ -109,8 +112,8 @@ GO
 -- Create #4
 CREATE TABLE toolboxPassword
 (
-    passwordValue NVARCHAR(255) NOT NULL,
     FK_userId INT NOT NULL,
+    passwordValue NVARCHAR(255) NOT NULL,
 
     CONSTRAINT FK_toolboxPassword_toolboxUser FOREIGN KEY (FK_userId) REFERENCES toolboxUser (userId)
 )
@@ -147,10 +150,10 @@ GO
 
 -- Users
 INSERT INTO toolboxUser
-    ([userName], [userEmail], [FK_roleId])
+    ([userName], [userEmail], [userStatus], [FK_roleId])
 VALUES
-    ('Admin', 'admin@admin.com', 1),
-    ('Member', 'member@member.com', 2)
+    ('Admin', 'admin@admin.com', 'active', 1),
+    ('Member', 'member@member.com', 'active', 2)
 GO
 
 -- Categories
@@ -202,9 +205,8 @@ VALUES
 
 GO
 
-
 -- --------------------------------
--- ------ End of test data --------
+-- ------ End of Test Data --------
 -- --------------------------------
 
 -- ----------------------
@@ -224,4 +226,8 @@ GO
 
 SELECT *
 FROM toolboxCategory
+GO
+
+SELECT *
+FROM toolboxRole
 GO
