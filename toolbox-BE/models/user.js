@@ -8,14 +8,15 @@ const salt = parseInt(config.get('saltRounds'));
 
 class User {
     // accountObj: {userEmail, userPassword, userName}
-    constructor(accountObj) {
-        this.userEmail = accountObj.userEmail;
-        this.userPassword = accountObj.userPassword;
-        this.userName = accountObj.userName;
+    constructor(userObj) {
+        this.userName = userObj.userName;
+        this.userEmail = userObj.userEmail;
+        this.userPassword = userObj.userPassword;
+        this.userStatus = userObj.userStatus;
     }
 
     // static validate(accountObj)
-    static validate(accountObj) {
+    static validate(userObj) {
         const schema = Joi.object({
             userEmail: Joi.string()
                 .required()
@@ -27,13 +28,17 @@ class User {
             userName: Joi.string()
                 .alphanum()
                 .min(1)
+                .max(50),
+            userStatus: Joi.string()
+                .min(1)
                 .max(50)
+                .required()
         });
 
-        return schema.validate(accountObj);
+        return schema.validate(userObj);
     }
 
-    static validateResponse(accountResponse) {
+    static validateResponse(userResponse) {
         const schema = Joi.object({
             userId: Joi.number()
                 .integer()
@@ -58,7 +63,7 @@ class User {
         return schema.validate(accountResponse);
     }
 
-    static checkCredentials(accountObj) {
+    static checkCredentials(userObj) {
         return new Promise((resolve, reject) => {
             (async () => {
                 // connect to DB
@@ -73,25 +78,34 @@ class User {
                 try {
                     const pool = await sql.connect(con);
                     const result = await pool.request()
-                        .input('userEmail', sql.NVarChar(255), accountObj.userEmail)
+                        .input('userEmail', sql.NVarChar(255), userObj.userEmail)
+                        // We are looking for a user with all the information needed:
+                        // First JOIN is to get the passwordValue that matches the userid.
+                        // Second JOIN is to get the Role that matches the user.
+                        // And it all have to match with the UserEmail.
                         .query(`
                             SELECT u.userId, u.userName, r.roleId, r.roleName, p.passwordValue
-                            FROM liloUser u
-                            JOIN liloPassword p
+                            FROM toolboxUser u
+                            JOIN toolboxPassword p
                                 ON u.userId = p.FK_userId
-                            JOIN liloRole r
+                            JOIN toolboxRole r
                                 ON u.FK_roleId = r.roleId
                             WHERE u.userEmail = @userEmail
                         `);
-                    console.log(result);
+                    console.log('(Class:USER) checkCredentials:', result);
 
-                    if (!result.recordset[0]) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
-                    if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: 'Multiple hits of unique data. Corrupt database.' }
+                    // (No match) if there are nothing in the recordset[], then throw.
+                    if (!result.recordset[0]) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.'};
+                    // (Multiple matches) if there are more than 1 result = there are 2 or more users with the same information then throw.
+                    if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: 'Multiple hits of unique data. Corrupt database: Multiple of same user.'};
 
-                    const bcrypt_result = await bcrypt.compare(accountObj.userPassword, result.recordset[0].passwordValue);
+                    // Check if the the given token-password is correct.
+                    const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
+                    // If there was no match, throw an error.
                     if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
 
-                    const accountResponse = {
+                    // Create the information into an object:
+                    const userResponse = {
                         userId: result.recordset[0].userId,
                         userName: result.recordset[0].userName,
                         userRole: {
@@ -99,18 +113,17 @@ class User {
                             roleName: result.recordset[0].roleName
                         }
                     }
+                    
+                    
                     // check if the format is correct!
-                    // will need a proper validate method for that
-
-                    // *** static validateResponse(accountResponse)
-                    const { error } = Account.validateResponse(accountResponse);
+                    const { error } = User.validateResponse(userResponse);
                     if (error) throw { statusCode: 500, errorMessage: 'Corrupt user account informaion in database.' }
 
-                    resolve(accountResponse);
+                    resolve(userResponse);
 
                 } catch (error) {
                     console.log(error);
-                    reject(error);
+                    reject('(Class:USER) checkCredentials: Error = ',error);
                 }
 
                 sql.close();
@@ -137,8 +150,8 @@ class User {
                         .input('userEmail', sql.NVarChar(255), accountObj.userEmail)
                         .query(`
                             SELECT u.userId, u.userName, r.roleId, r.roleName
-                            FROM liloUser u
-                            JOIN liloRole r
+                            FROM toolboxUser u
+                            JOIN toolboxRole r
                                 ON u.FK_roleId = r.roleId
                             WHERE u.userEmail = @userEmail 
                         `);
@@ -211,16 +224,16 @@ class User {
                             .input('userEmail', sql.NVarChar(255), this.userEmail)
                             .input('hashedPassword', sql.NVarChar(255), hashedPassword)
                             .query(`
-                        INSERT INTO liloUser([userName], [userEmail], [FK_roleId])
+                        INSERT INTO toolboxUser([userName], [userEmail], [FK_roleId])
                         VALUES (@userName, @userEmail, 2);
 
                         SELECT u.userId, u.userName, r.roleId, r.roleName
-                        FROM liloUser u
-                        JOIN liloRole r
+                        FROM toolboxUser u
+                        JOIN toolboxRole r
                             ON u.FK_roleId = r.roleId
                         WHERE u.userId = SCOPE_IDENTITY();
 
-                        INSERT INTO liloPassword([passwordValue], [FK_userId])
+                        INSERT INTO toolboxPassword([passwordValue], [FK_userId])
                         VALUES (@hashedPassword, SCOPE_IDENTITY());
                     `);
                         console.log(result00);

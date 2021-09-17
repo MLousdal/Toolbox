@@ -9,13 +9,13 @@ const cors = require('cors');
 // custom middleware
 const setContentTypeJSON = require('./middleware/setResponseHeader');
 
-const accounts = require('./routes/accounts');
+const users = require('./routes/users');
 const tools = require('./routes/tools');
 
 app.use(express.json());
 app.use(cors());
 app.use(setContentTypeJSON);
-app.use('/api/accounts', accounts);
+app.use('/api/user', users);
 
 // books --> tools
 app.use('/api/tools', tools);
