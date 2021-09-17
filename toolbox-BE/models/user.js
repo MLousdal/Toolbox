@@ -7,20 +7,23 @@ const con = config.get('dbConfig_UCN');
 const salt = parseInt(config.get('saltRounds'));
 
 class User {
-    // accountObj: {userEmail, userPassword, userName}
+    // userObj: {userId, userName, userEmail, userPassword, userStatus}
     constructor(userObj) {
+        this.userId = userObj.userId;
         this.userName = userObj.userName;
         this.userEmail = userObj.userEmail;
         this.userPassword = userObj.userPassword;
         this.userStatus = userObj.userStatus;
     }
 
-    // static validate(accountObj)
+    // static validate(userObj)
     static validate(userObj) {
         const schema = Joi.object({
+            userId: Joi.number()
+            .integer(),
             userEmail: Joi.string()
-                .required()
-                .email(),
+                .email()
+                .required(),
             userPassword: Joi.string()
                 .min(1)
                 .max(255)
@@ -60,7 +63,7 @@ class User {
             }).required()
         });
 
-        return schema.validate(accountResponse);
+        return schema.validate(userResponse);
     }
 
     static checkCredentials(userObj) {
@@ -265,6 +268,73 @@ class User {
                     }
                 }
 
+                sql.close();
+            })();
+        });
+    }
+
+    static readAll(userid) {
+        return new Promise((resolve, reject) => {
+            (async () => {
+                // › › connect to DB
+                // › › create SQL query string (SELECT *u.userName, u.userEmail, u.userStatus FROM toolboxUser)
+                // › › if userid, add WHERE userid to query string to only find 
+                // › › query DB with query string
+                // › › restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
+                // › › validate objects
+                // › › close DB connection
+
+                try {
+                    const pool = await sql.connect(con);
+                    let result;
+
+                    if (userid) {
+                        result = await pool.request()
+                            .input('userId', sql.Int(), userid)
+                            .query(`
+                                SELECT u.userName, u.userEmail, u.userStatus
+                                FROM toolboxUser u 
+                                WHERE u.userId = @userId
+                            `);
+                    } else {
+                        result = await pool.request()
+                            .query(`
+                                SELECT u.userName, u.userEmail, u.userStatus
+                                FROM toolboxUser u 
+                                ORDER BY u.userStatus ASC
+                            `);
+                    }
+
+                    const users = [];
+
+                    result.recordset.forEach((record, index) => {
+                        const newUser = {
+                            userId: record.toolid,
+                            userName: record.userName,
+                            userEmail: record.userEmail,
+                            userStatus: record.userStatus,
+                        }
+
+                        // Validate if newUser are in the right format and right info.
+                        const { error } = User.validate(newUser);
+                        if (error) throw { errorMessage: 'User validation, failed! Index: ' + index + ' ;Error: ' + error}; // Will also send where in the loop the error occured.
+
+                        users.push(newUser);
+                    });
+
+                    resolve(users);
+
+                    // Checking if the newUsers have the right structure and data.
+                    // const validUsers = [];
+                    // users.forEach(user => {
+                    //     const { error } = User.validate(user);
+                    //     if (error) throw { errorMessage: 'User validation, failed! Error: ' + error};
+
+                    //     validUsers.push(new User(user));
+                    // });
+                } catch (error) {
+                    reject(error);
+                }
                 sql.close();
             })();
         });

@@ -82,17 +82,17 @@ class Tool {
                             .input('authorid', sql.Int(), authorid)
                             .query(`
                             SELECT b.toolid, b.title, b.year, b.link, a.authorid, a.firstname, a.lastname 
-                            FROM liloTool b
-                            JOIN liloToolAuthor ba
+                            FROM toolboxTool b
+                            JOIN toolboxToolAuthor ba
                                 ON b.toolid = ba.FK_toolid
-                            JOIN liloAuthor a
+                            JOIN toolboxAuthor a
                                 ON ba.FK_authorid = a.authorid
                             WHERE b.toolid IN (
                                 SELECT b.toolid
-                                FROM lilotool b
-                                JOIN liloToolAuthor ba
+                                FROM toolboxtool b
+                                JOIN toolboxToolAuthor ba
                                     ON b.toolid = ba.FK_toolid
-                                JOIN liloAuthor a
+                                JOIN toolboxAuthor a
                                     ON ba.FK_authorid = a.authorid
                                 WHERE a.authorid = @authorid
                             )
@@ -102,10 +102,10 @@ class Tool {
                         result = await pool.request()
                             .query(`
                             SELECT b.toolid, b.title, b.year, b.link, a.authorid, a.firstname, a.lastname 
-                            FROM liloTool b
-                            JOIN liloToolAuthor ba
+                            FROM toolboxTool b
+                            JOIN toolboxToolAuthor ba
                                 ON b.toolid = ba.FK_toolid
-                            JOIN liloAuthor a
+                            JOIN toolboxAuthor a
                                 ON ba.FK_authorid = a.authorid
                             ORDER BY b.toolid, a.authorid
                         `);
@@ -177,10 +177,10 @@ class Tool {
                         .input('toolid', sql.Int(), toolid)
                         .query(`
                             SELECT b.toolid, b.title, b.year, b.link, a.authorid, a.firstname, a.lastname 
-                            FROM liloTool b
-                            JOIN liloToolAuthor ba
+                            FROM toolboxTool b
+                            JOIN toolboxToolAuthor ba
                                 ON b.toolid = ba.FK_toolid
-                            JOIN liloAuthor a
+                            JOIN toolboxAuthor a
                                 ON ba.FK_authorid = a.authorid
                             WHERE b.toolid = @toolid
                     `)
@@ -261,7 +261,7 @@ class Tool {
                         .input('year', sql.Int(), this.year)
                         .query(`
                             SELECT *
-                            FROM liloTool b
+                            FROM lTool b
                             WHERE b.title = @title AND b.year = @year
                         `)
 
@@ -275,14 +275,14 @@ class Tool {
                         .input('link', sql.NVarChar(255), this.link)
                         .input('authorid', sql.Int(), this.authors[0].authorid)
                         .query(`
-                                INSERT INTO liloTool (title, year, link)
+                                INSERT INTO toolboxTool (title, year, link)
                                 VALUES (@title, @year, @link);
                         
                                 SELECT *
-                                FROM liloTool
+                                FROM toolboxTool
                                 WHERE toolid = SCOPE_IDENTITY();
 
-                                INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
+                                INSERT INTO toolboxToolAuthor (FK_toolid, FK_authorid)
                                 VALUES (SCOPE_IDENTITY(), @authorid);
                         `)
 
@@ -296,7 +296,7 @@ class Tool {
                                 .input('toolid', sql.Int(), toolid)
                                 .input('authorid', sql.Int(), author.authorid)
                                 .query(`
-                                    INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
+                                    INSERT INTO toolboxToolAuthor (FK_toolid, FK_authorid)
                                     VALUES (@toolid, @authorid)
                                 `)
                         }
@@ -335,13 +335,13 @@ class Tool {
                     const result = await pool.request()
                         .input('toolid', sql.Int(), toolid)
                         .query(`
-                        DELETE liloToolAuthor
+                        DELETE toolboxToolAuthor
                         WHERE FK_toolid = @toolid;
 
-                        DELETE liloLoan
+                        DELETE toolboxLoan
                         WHERE FK_toolid = @toolid;
 
-                        DELETE liloTool
+                        DELETE toolboxTool
                         WHERE toolid = @toolid
                     `);
 
@@ -386,17 +386,17 @@ class Tool {
                         .input('toolid', sql.Int(), this.toolid)
                         .input('authorid', sql.Int(), this.authors[0].authorid)
                         .query(`
-                            UPDATE liloTool
+                            UPDATE toolboxTool
                             SET
                                 title = @title,
                                 year = @year,
                                 link = @link
                             WHERE toolid = @toolid;
 
-                            DELETE liloToolAuthor
+                            DELETE toolboxToolAuthor
                             WHERE FK_toolid = @toolid;
 
-                            INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
+                            INSERT INTO toolboxToolAuthor (FK_toolid, FK_authorid)
                             VALUES (@toolid, @authorid)
                         `);
 
@@ -407,7 +407,7 @@ class Tool {
                                 .input('toolid', sql.Int(), this.toolid)
                                 .input('authorid', sql.Int(), author.authorid)
                                 .query(`
-                                        INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
+                                        INSERT INTO toolboxToolAuthor (FK_toolid, FK_authorid)
                                         VALUES (@toolid, @authorid)
                                     `);
                         }

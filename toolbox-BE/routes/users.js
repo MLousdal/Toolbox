@@ -184,17 +184,17 @@ router.put('/delete/:userid', async (req, res) => {
 // ----- (ADMIN) ALL Users
 router.get('/', async (req, res) => {
     // need to call the Tool class for DB access...
-    let authorid;
-    if (req.query.author) {
-        authorid = parseInt(req.query.author);
-        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+    let userid;
+    if (req.query.user) {
+        userid = parseInt(req.query.user);
+        if (!userid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?user= should refer an user id (integer)' }));
     }
 
     try {
-        const tools = await User.readAll(authorid);
-        return res.send(JSON.stringify(tools));
+        const user = await User.readAll(userid);
+        return res.send(JSON.stringify(user));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        return res.status(500).send(JSON.stringify({errorMessage: err, from: "router.get(All Users)"}));
     }
 });
 
