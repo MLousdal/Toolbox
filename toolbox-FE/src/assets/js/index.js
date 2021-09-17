@@ -104,7 +104,6 @@ if (allToolOptions) {
           options.classList.toggle("flex");
           break;
         case updateBtn:
-          console.log("update");
           myPageForms.innerHTML += `
           <form id="updateTool">
             <h3>Update [toolName]</h3>
@@ -126,25 +125,59 @@ if (allToolOptions) {
                 <option value="backend">backend</option>
             </select>
             </label>
-            <hr>
-            <button class="btn active" id="updateToolSubmit">submit</button>
+            <button class="btn active" id="UoldTool">submit</button>
           </form>
           `;
           options.classList.toggle("flex");
+          updateAllmyPageForms();
           break;
         case deleteBtn:
-          console.log("delete");
           if (confirm("Are you sure?")) {
-            console.log("send for delete")
+            console.log("send for delete");
             tool.style.display = "none";
           } else {
-            console.log("not sure")
+            console.log("not sure");
           }
           options.classList.toggle("flex");
+          updateAllmyPageForms();
           break;
         default:
           break;
       }
     });
   });
+}
+
+// AllmyPageForms
+const myPageForms = document.querySelector(".myPageForms");
+
+if (myPageForms) {
+  let AllmyPageForms = [];
+
+  function updateAllmyPageForms() {
+    let AllmyPageForms = document.querySelectorAll(".myPageForms form");
+    console.log(AllmyPageForms);
+
+    AllmyPageForms.forEach((form) => {
+      const submitToolBtn = document.querySelector("#SnewTool");
+      const updateToolBtn = document.querySelector("#UoldTool");
+
+      form.addEventListener("click", (e) => {
+        switch (e.target) {
+          case submitToolBtn:
+            console.log("submitTool");
+            // ready for fetch integration
+            break;
+            case updateToolBtn:
+              console.log("updateTool");
+              // ready for fetch integration
+            break;
+          default:
+            break;
+        }
+      });
+    });
+  }
+
+  updateAllmyPageForms();
 }
