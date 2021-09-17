@@ -22,19 +22,24 @@
     order: 1;
     
     .tool {
+      display: flex;
+      flex-direction: column;
       background-color: var(--foreground-color);
       padding: $spacing-m;
       border-radius: $border-radius;
-      max-width: 20em;
+      max-width: 25em;
       border: 1px solid var(--font-color);
 
       p {
-        margin-top: auto;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
+      }
+      
+      a {
+        margin-top: auto;
       }
     }
 

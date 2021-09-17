@@ -23,7 +23,7 @@ if (toolbox) {
 
   designSec.style.display = "grid";
 
-  btnContainer.addEventListener("click", (e)=> {
+  btnContainer.addEventListener("click", (e) => {
     switch (e.target) {
       case design:
         designSec.style.display = "grid";
@@ -49,37 +49,102 @@ if (toolbox) {
         frontendSec.style.display = "none";
         backendSec.style.display = "grid";
         break;
-    
+
       default:
         break;
     }
   });
 }
 
-
 // toggle between forms
 const forms = document.querySelector(".forms");
 
 if (forms) {
   const loginBtn = document.querySelector("#login");
-  const loginForm = document.querySelector(".login")
-  
+  const loginForm = document.querySelector(".login");
+
   const signupBtn = document.querySelector("#signup");
   const signupForm = document.querySelector(".signup");
 
   const btnContainer = document.querySelector(".btn-container");
-  
+
   btnContainer.addEventListener("click", (e) => {
     switch (e.target) {
       case loginBtn:
         loginForm.style.display = "flex";
         signupForm.style.display = "none";
         break;
-        case signupBtn: 
+      case signupBtn:
         signupForm.style.display = "flex";
         loginForm.style.display = "none";
         break;
     }
-  });  
+  });
 }
 
+// tool options
+const allToolOptions = document.querySelectorAll(".toolOptions");
+
+if (allToolOptions) {
+  allToolOptions.forEach((tool) => {
+    const options = tool.children[1];
+    const optionsBtn = tool.children[2];
+    const updateBtn = options.children[0];
+    const deleteBtn = options.children[1];
+
+    const myPageForms = document.querySelector(".myPageForms");
+
+    const title = tool.children[0].children[0].innerHTML;
+    const desc = tool.children[0].children[1].innerHTML;
+    const link = tool.children[0].children[2].href;
+
+    tool.addEventListener("click", (e) => {
+      switch (e.target) {
+        case optionsBtn:
+          options.classList.toggle("flex");
+          break;
+        case updateBtn:
+          console.log("update");
+          myPageForms.innerHTML += `
+          <form id="updateTool">
+            <h3>Update [toolName]</h3>
+            <label for="Utitel">title: 
+              <input type="text" id="Utitel" name="updateTool" required value="${title}">
+            </label>
+            <label for="Udesc">description:
+              <textarea id="Udesc" name="updateTool" rows="3" required>${desc}</textarea>
+            </label>
+            <label for="Ulink">link: 
+              <input type="text" id="Ulink" name="updateTool" required value="${link}">
+            </label>
+            <label for="Ucategory">category: 
+              <select name="updateTool" id="Ucategory" required>
+                <option value="">--Please choose a category --</option>
+                <option value="design">Design</option>
+                <option value="UX">UX</option>
+                <option value="frontend">frontend</option>
+                <option value="backend">backend</option>
+            </select>
+            </label>
+            <hr>
+            <button class="btn active" id="updateToolSubmit">submit</button>
+          </form>
+          `;
+          options.classList.toggle("flex");
+          break;
+        case deleteBtn:
+          console.log("delete");
+          if (confirm("Are you sure?")) {
+            console.log("send for delete")
+            tool.style.display = "none";
+          } else {
+            console.log("not sure")
+          }
+          options.classList.toggle("flex");
+          break;
+        default:
+          break;
+      }
+    });
+  });
+}

@@ -37,43 +37,47 @@
           <section>
             <h3>Submitted tools:</h3>
             <div class="tools">
-              <article class="tool">
-                <h4>Google fonts</h4>
-                <p>Google fonts is for finding fonts for your project that requires fontsGoogle fonts is for finding fonts for your project that requires fonts</p>
-                <a href="#">visit tool..</a>
-            </article>
-            <article class="tool">
-                <h4>Google fonts</h4>
-                <p>Google fonts is for finding fonts for your project that requires fonts</p>
-                <a href="#">visit tool..</a>
-            </article>
-            <article class="tool">
-                <h4>Google fonts</h4>
-                <p>Google fonts is for finding fonts for your project that requires fonts</p>
-                <a href="#">visit tool..</a>
-            </article>
-            <article class="tool">
-                <h4>Google fonts</h4>
-                <p>Google fonts is for finding fonts for your project that requires fonts</p>
-                <a href="#">visit tool..</a>
-            </article>
+              <div class="toolOptions">
+                <article class="tool">
+                  <h4>Google fonts</h4>
+                  <p>Google fonts is for finding fonts for your project that requires fontsGoogle fonts is for finding fonts for your project that requires fonts</p>
+                  <a href="#">visit tool..</a>
+                </article>
+                <div class="options">
+                  <button class="update btn">update</button>
+                  <button class="delete btn">delete</button>
+                </div>
+                <button class="optionsBtn">&#10247;</button>
+              </div>
+              <div class="toolOptions">
+                <article class="tool">
+                  <h4>AKAR ICONS</h4>
+                  <p>Perfectly rounded icon library made for designers and developers</p>
+                  <a href="#">visit tool..</a>
+                </article>
+                <div class="options">
+                  <button class="update btn">update</button>
+                  <button class="delete btn">delete</button>
+                </div>
+                <button class="optionsBtn">&#10247;</button>
+              </div>
             </div>
           </section>
       </section>
-      <section id="myPageForms">
+      <section class="myPageForms">
         <form id="submitTool">
           <h3>Submit a new tool:</h3>
-          <label for="STtitel">title: 
-            <input type="text" id="STtitel" name="submitTool" required>
+          <label for="Stitel">title: 
+            <input type="text" id="Stitel" name="submitTool" required>
           </label>
-          <label for="STdesc">description:
-            <textarea id="STdesc" name="submitTool" rows="3" required></textarea>
+          <label for="Sdesc">description:
+            <textarea id="Sdesc" name="submitTool" rows="3" required></textarea>
           </label>
-          <label for="STlink">link: 
-            <input type="text" id="STlink" name="submitTool" required>
+          <label for="Slink">link: 
+            <input type="text" id="Slink" name="submitTool" required>
           </label>
-          <label for="STcategory">link: 
-            <select name="submitTool" id="STcategory" required>
+          <label for="Scategory">category: 
+            <select name="submitTool" id="Scategory" required>
               <option value="">--Please choose a category --</option>
               <option value="design">Design</option>
               <option value="UX">UX</option>
@@ -83,29 +87,6 @@
           </label>
           <hr>
           <button class="btn active" id="newToolSubmit">submit</button>
-        </form>
-        <form id="updateTool">
-          <h3>Update [toolName]</h3>
-          <label for="STtitel">title: 
-            <input type="text" id="STtitel" name="updateTool" required>
-          </label>
-          <label for="STdesc">description:
-            <textarea id="STdesc" name="updateTool" rows="3" required></textarea>
-          </label>
-          <label for="STlink">link: 
-            <input type="text" id="STlink" name="updateTool" required>
-          </label>
-          <label for="STcategory">link: 
-            <select name="updateTool" id="STcategory" required>
-              <option value="">--Please choose a category --</option>
-              <option value="design">Design</option>
-              <option value="UX">UX</option>
-              <option value="frontend">frontend</option>
-              <option value="backend">backend</option>
-          </select>
-          </label>
-          <hr>
-          <button class="btn active" id="updateToolSubmit">submit</button>
         </form>
       </section>
     </main>
