@@ -24,15 +24,18 @@ const Tool = require('../models/tool');
 // PUT
 // /api/tools/me/:toolID
 // /api/tools/:toolID
-
+// PUT - (SOFT DELETE)
+// /api/tools/delete/me
+// /api/tools/delete/:toolID
 
 
 // ---------------------------------------------------------
 
 
+
 //------------------------GET-------------------------------
 
-//         GET /api/tools 
+//         GET /api/tools (All tools)
 
 router.get('/', async (req, res) => {
     // need to call the Tool class for DB access...
@@ -51,7 +54,7 @@ router.get('/', async (req, res) => {
 });
 
 
-//        GET api/tools/:toolID
+//        GET api/tools/:toolID (Specific tool)
 
 router.get('/:toolid', async (req, res) => {
     // › › validate req.params.toolid as toolid
@@ -67,9 +70,9 @@ router.get('/:toolid', async (req, res) => {
     }
 });
 
-//        GET /api/tools/me
+//        GET /api/tools/me (Own tools)
 
-router.get('/:toolid', async (req, res) => {
+router.get('/me', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › call await Tool.readById(req.params.toolid)
     const { error } = Tool.validate(req.params);
@@ -111,6 +114,7 @@ router.post('/', async (req, res) => {
 
 // DELETE NOT USED IN PROJECT
 
+
 /*   router.delete('/:toolid', async (req, res) => {
         // › › validate req.params.toolid as toolid
         // › › call await Tool.delete(req.params.toolid)
@@ -132,7 +136,7 @@ router.post('/', async (req, res) => {
 
 //          PUT /api/tools/me/:toolID
 
-router.put('/:toolid', async (req, res) => {
+router.put('/me/:toolid', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
@@ -158,6 +162,58 @@ router.put('/:toolid', async (req, res) => {
 //          PUT /api/tools/:toolID
 
 router.put('/:toolid', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Tool.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+
+    const payloadValidate = Tool.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Tool.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+
+
+
+
+//------------------------PUT(SOFT-DELETE)-------------------------------
+
+//          PUT /api/tools/delete/me (MEMBER - DELETE OWN TOOL)
+
+router.put('/delete/me', async (req, res) => {
+    // › › validate req.params.toolid as toolid
+    // › › validate req.body (payload) as tool --> authors must have authorid!
+    // › › call tool = await Tool.readById(req.params.toolid)
+    // › › merge / overwrite tool object with req.body
+    // › › call await tool.update() --> tool holds the updated information
+    const toolidValidate = Tool.validate(req.params);
+    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+
+    const payloadValidate = Tool.validate(req.body);
+    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+
+    try {
+        const oldTool = await Tool.readById(req.params.toolid);
+        oldTool.copy(req.body);
+        const tool = await oldTool.update();
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+//          PUT /api/tools/delete/:toolID (ADMIN - DELETE ANY)
+
+router.put('/delete/:toolid', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
