@@ -1,13 +1,12 @@
-// *** previously logins.js --> accounts.js
+// *** previously logins.js --> Users.js
 // now serving endpoints:
-//      POST    /api/accounts/login
-//      POST    /api/accounts
+//      POST    /api/Users/login
+//      POST    /api/Users
 
 const express = require('express');
 const router = express.Router();
 
-// previously Login from ../models/login
-const Account = require('../models/account');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 
@@ -18,41 +17,64 @@ const secret = config.get('jwt_secret_key');
 // ----------------- TABLE OF CONTENTS ---------------------
 // ---------------------------------------------------------
 // POST
-// /api/accounts
-// /api/accounts/login
+// /api/Users
+// /api/Users/login
 
 // PUT
-// /api/accounts/:accountId
-// /api/accounts/delete/me
-// /api/accounts/delete/:accountId
+// /api/Users/:UserId
+// /api/Users/delete/me
+// /api/Users/delete/:UserId
 
 // GET
-// /api/accounts
-// /api/accounts/me
-// /api/accounts/:accountId
+// /api/Users
+// /api/Users/me
+// /api/Users/:UserId
 // ---------------------------------------------------------
 
 //------------------------POST-------------------------------
+//          POST /api/Users (SIGNUP)
+// previously '/signup'
+router.post('/', async (req, res) => {
+    
+    try {
+        // previously Login.validate(req.body)
+        const { error } = User.validate(req.body);
+        if (error) throw { statusCode: 400, errorMessage: error };
 
-//          POST /api/accounts/login (LOGIN)
+        // previously const loginObj = new Login(req.body);
+        const UserObj = new User(req.body);
+        // previously const user = await loginObj.create();
+        const User = await UserObj.create();
+
+        // previously user
+        return res.send(JSON.stringify(User));
+    } catch (err) {
+        console.log(err);
+        // need to make the condition check sensible...
+        if (!err.statusCode) return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        if (err.statusCode != 400) return res.status(err.statusCode).send(JSON.stringify({ errorMessage: err }));
+        return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
+    }
+});
+
+//          POST /api/Users/login (LOGIN)
 // previously '/'
 router.post('/login', async (req, res) => {
-    // res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Expose-Headers', 'x-authenticate-token');
     try {
         // previously Login.validate(req.body)
-        const { error } = Account.validate(req.body);
+        const { error } = User.validate(req.body);
         if (error) throw { statusCode: 400, errorMessage: error };
 
         // previously const loginObj = new Login(req.body)
-        const accountObj = new Account(req.body);
+        const UserObj = new User(req.body);
         // previously const user = await Login.readByEmail(loginObj)
-        const account = await Account.checkCredentials(accountObj);
+        const User = await User.checkCredentials(UserObj);
 
-        const token = await jwt.sign(account, secret);
+        const token = await jwt.sign(User, secret);
         res.setHeader('x-authenticate-token', token);
         // previously user
-        return res.send(JSON.stringify(account));
+        return res.send(JSON.stringify(User));
 
     } catch (err) {
         console.log(err);
@@ -64,47 +86,23 @@ router.post('/login', async (req, res) => {
 });
 
 
-//          POST /api/accounts (SIGNUP)
-// previously '/signup'
-router.post('/', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    try {
-        // previously Login.validate(req.body)
-        const { error } = Account.validate(req.body);
-        if (error) throw { statusCode: 400, errorMessage: error };
-
-        // previously const loginObj = new Login(req.body);
-        const accountObj = new Account(req.body);
-        // previously const user = await loginObj.create();
-        const account = await accountObj.create();
-
-        // previously user
-        return res.send(JSON.stringify(account));
-    } catch (err) {
-        console.log(err);
-        // need to make the condition check sensible...
-        if (!err.statusCode) return res.status(500).send(JSON.stringify({ errorMessage: err }));
-        if (err.statusCode != 400) return res.status(err.statusCode).send(JSON.stringify({ errorMessage: err }));
-        return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
-    }
-});
 
 //------------------------PUT-------------------------------
-// ----- (MEMBER) UPDATE own account
+// ----- (MEMBER) UPDATE own User
 router.put('/me', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Account.validate(req.params);
+    const toolidValidate = User.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
-    const payloadValidate = Account.validate(req.body);
+    const payloadValidate = User.validate(req.body);
     if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
 
     try {
-        const oldTool = await Account.readById(req.params.toolid);
+        const oldTool = await User.readById(req.params.toolid);
         oldTool.copy(req.body);
         const tool = await oldTool.update();
         return res.send(JSON.stringify(tool));
@@ -113,21 +111,21 @@ router.put('/me', async (req, res) => {
     }
 });
 
-// ----- (ADMIN) UPDATE account
-router.put('/:accountid', async (req, res) => {
+// ----- (ADMIN) UPDATE User
+router.put('/:userid', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Account.validate(req.params);
+    const toolidValidate = User.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
-    const payloadValidate = Account.validate(req.body);
+    const payloadValidate = User.validate(req.body);
     if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
 
     try {
-        const oldTool = await Account.readById(req.params.toolid);
+        const oldTool = await User.readById(req.params.toolid);
         oldTool.copy(req.body);
         const tool = await oldTool.update();
         return res.send(JSON.stringify(tool));
@@ -136,21 +134,21 @@ router.put('/:accountid', async (req, res) => {
     }
 });
 
-// ----- (MEMBER) "DELETE" own account
+// ----- (MEMBER) "DELETE" own User
 router.put('/delete/me', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Account.validate(req.params);
+    const toolidValidate = User.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
-    const payloadValidate = Account.validate(req.body);
+    const payloadValidate = User.validate(req.body);
     if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
 
     try {
-        const oldTool = await Account.readById(req.params.toolid);
+        const oldTool = await User.readById(req.params.toolid);
         oldTool.copy(req.body);
         const tool = await oldTool.update();
         return res.send(JSON.stringify(tool));
@@ -159,21 +157,21 @@ router.put('/delete/me', async (req, res) => {
     }
 });
 
-// ----- (ADMIN) "DELETE" any account
-router.put('/delete/:accountid', async (req, res) => {
+// ----- (ADMIN) "DELETE" any User
+router.put('/delete/:userid', async (req, res) => {
     // › › validate req.params.toolid as toolid
     // › › validate req.body (payload) as tool --> authors must have authorid!
     // › › call tool = await Tool.readById(req.params.toolid)
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Account.validate(req.params);
+    const toolidValidate = User.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
-    const payloadValidate = Account.validate(req.body);
+    const payloadValidate = User.validate(req.body);
     if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
 
     try {
-        const oldTool = await Account.readById(req.params.toolid);
+        const oldTool = await User.readById(req.params.toolid);
         oldTool.copy(req.body);
         const tool = await oldTool.update();
         return res.send(JSON.stringify(tool));
@@ -183,7 +181,7 @@ router.put('/delete/:accountid', async (req, res) => {
 });
 
 //------------------------GET-------------------------------
-// ----- (ADMIN) ALL accounts
+// ----- (ADMIN) ALL Users
 router.get('/', async (req, res) => {
     // need to call the Tool class for DB access...
     let authorid;
@@ -193,14 +191,14 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const tools = await Account.readAll(authorid);
+        const tools = await User.readAll(authorid);
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
     }
 });
 
-// ----- (MEMBER) OWN account
+// ----- (MEMBER) OWN User
 router.get('/me', async (req, res) => {
     // need to call the Tool class for DB access...
     let authorid;
@@ -210,15 +208,15 @@ router.get('/me', async (req, res) => {
     }
 
     try {
-        const tools = await Account.readAll(authorid);
+        const tools = await User.readAll(authorid);
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
     }
 });
 
-// ----- (ADMIN) A specific account
-router.get('/me', async (req, res) => {
+// ----- (ADMIN) A specific User
+router.get('/:userid', async (req, res) => {
     // need to call the Tool class for DB access...
     let authorid;
     if (req.query.author) {
@@ -227,7 +225,7 @@ router.get('/me', async (req, res) => {
     }
 
     try {
-        const tools = await Account.readAll(authorid);
+        const tools = await User.readAll(authorid);
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));

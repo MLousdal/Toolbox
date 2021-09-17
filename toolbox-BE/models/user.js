@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const con = config.get('dbConfig_UCN');
 const salt = parseInt(config.get('saltRounds'));
 
-class Account {
+class User {
     // accountObj: {userEmail, userPassword, userName}
     constructor(accountObj) {
         this.userEmail = accountObj.userEmail;
@@ -259,4 +259,4 @@ class Account {
 }
 
 // previously module.exports = Login;
-module.exports = Account;
+module.exports = User;
