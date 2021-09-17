@@ -106,7 +106,7 @@ if (allToolOptions) {
         case updateBtn:
           myPageForms.innerHTML += `
           <form id="updateTool">
-            <h3>Update [toolName]</h3>
+            <h3>Update: ${title}</h3>
             <label for="Utitel">title: 
               <input type="text" id="Utitel" name="updateTool" required value="${title}">
             </label>
