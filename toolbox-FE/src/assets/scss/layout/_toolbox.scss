@@ -1,0 +1,65 @@
+@use "../base/variables" as *;
+
+
+.toolbox {
+  padding-block: min(10vh, #{$spacing-l});
+  display: flex; 
+  flex-direction: column;
+  flex-wrap: no-wrap;
+  justify-content: flex-start;
+  gap: $spacing-xs;
+  
+  input[type="radio"] {
+    display: none;
+  }
+}
+
+  .tools {
+    display: none;
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-s;
+    order: 1;
+    
+    .tool {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--foreground-color);
+      padding: $spacing-m;
+      border-radius: $border-radius;
+      max-width: 25em;
+      border: 1px solid var(--font-color);
+
+      p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+      
+      a {
+        margin-top: auto;
+      }
+    }
+
+  input[type="radio"]:checked + label {
+    background-color: var(--color-primary);
+  }
+
+  input[type="radio"]:checked + label + .tools {
+    display: grid;
+  }
+}
+
+@media (max-width: 1150px) {
+  .toolbox .tools {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .toolbox .tools {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
