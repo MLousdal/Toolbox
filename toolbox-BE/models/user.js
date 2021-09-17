@@ -26,8 +26,7 @@ class User {
                 .required(),
             userPassword: Joi.string()
                 .min(1)
-                .max(255)
-                .required(),
+                .max(255),
             userName: Joi.string()
                 .alphanum()
                 .min(1)
@@ -299,20 +298,20 @@ class User {
                     } else {
                         result = await pool.request()
                             .query(`
-                                SELECT u.userName, u.userEmail, u.userStatus
+                                SELECT u.userId, u.userName, u.userEmail, u.userStatus
                                 FROM toolboxUser u 
                                 ORDER BY u.userStatus ASC
                             `);
                     }
 
                     const users = [];
-
                     result.recordset.forEach((record, index) => {
                         const newUser = {
-                            userId: record.toolid,
+                            userId: record.userId,
+                            // userId: "asdasdas",
                             userName: record.userName,
                             userEmail: record.userEmail,
-                            userStatus: record.userStatus,
+                            userStatus: record.userStatus
                         }
 
                         // Validate if newUser are in the right format and right info.
@@ -323,15 +322,6 @@ class User {
                     });
 
                     resolve(users);
-
-                    // Checking if the newUsers have the right structure and data.
-                    // const validUsers = [];
-                    // users.forEach(user => {
-                    //     const { error } = User.validate(user);
-                    //     if (error) throw { errorMessage: 'User validation, failed! Error: ' + error};
-
-                    //     validUsers.push(new User(user));
-                    // });
                 } catch (error) {
                     reject(error);
                 }

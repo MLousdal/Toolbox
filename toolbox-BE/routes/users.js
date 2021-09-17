@@ -181,34 +181,33 @@ router.put('/delete/:userid', async (req, res) => {
 });
 
 //------------------------GET-------------------------------
-// ----- (ADMIN) ALL Users
+// ----- (ADMIN) GET ALL Users
 router.get('/', async (req, res) => {
-    // need to call the Tool class for DB access...
-    let userid;
-    if (req.query.user) {
-        userid = parseInt(req.query.user);
-        if (!userid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?user= should refer an user id (integer)' }));
-    }
-
     try {
-        const user = await User.readAll(userid);
+        const user = await User.readAll();
         return res.send(JSON.stringify(user));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({errorMessage: err, from: "router.get(All Users)"}));
+        return res.status(500).send(JSON.stringify(
+            {errorMessage: err, 
+                placeOfError: [
+                    {place: "users: router.get"},
+                    {routerName: "(ADMIN) GET ALL Users"}
+                ]}));
     }
 });
 
 // ----- (MEMBER) OWN User
-router.get('/me', async (req, res) => {
-    // need to call the Tool class for DB access...
-    let authorid;
-    if (req.query.author) {
-        authorid = parseInt(req.query.author);
-        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+router.get('/:me', async (req, res) => {
+    //URL segmet is :me
+    let me;
+    if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+        me = parseInt(req.params.me);
+        if (!me) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?mer= should refer an user id (integer)' }));
     }
 
+
     try {
-        const tools = await User.readAll(authorid);
+        const tools = await User.readAll(me);
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
