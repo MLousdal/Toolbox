@@ -1,0 +1,47 @@
+// Require models.
+const User = require('../models/user');
+
+// Heavly inspired by this guide: https://dev.to/nedsoft/central-error-handling-in-express-3aej
+class TakeError extends Error {
+    constructor(statusCode, message) {
+        super();
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+}
+
+class HandleIt {
+    constructor(handleObj) {
+
+    }
+    static userVal(validate,status) {
+        // $ is used for easier naming.
+        const $validate = User.validate(validate);
+
+        // Want to change the status?
+        let $status;
+        if (status) {
+            $status = status;
+        } else {
+            $status = 400;
+        }
+        // If error is true(exists), return with an errorMessage.
+        if ($validate.error) return res.status($status).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+    }
+
+}
+
+function useError (err, res) {
+    const { statusCode, message} = err; // This will destructure err in to 2 parts. The first part of the obj will be called statusCode (like, let statusCode = err[0]), and second part will be called message (err[1]).
+    res.status(statusCode).send(JSON.stringify({
+        status: "Error",
+        statusCode,
+        message
+    }))
+}
+
+module.exports = {
+    TakeError,
+    useError()
+}
+exports.HandleIt = HandleIt;

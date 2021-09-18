@@ -6,8 +6,9 @@ const app = express();
 
 const cors = require('cors');
 
-// custom middleware
+// Custom middleware
 const setContentTypeJSON = require('./middleware/setResponseHeader');
+const errorMiddleware = require('./middleware/error');
 
 const users = require('./routes/users');
 const tools = require('./routes/tools');
@@ -16,6 +17,10 @@ app.use(express.json());
 app.use(cors());
 app.use(setContentTypeJSON);
 app.use('/api/users', users);
+
+// After Other Middleware
+app.use(errorMiddleware);
+
 
 // books --> tools
 app.use('/api/tools', tools);
