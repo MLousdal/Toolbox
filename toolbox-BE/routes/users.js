@@ -203,7 +203,7 @@ router.get('/:me', async (req, res, next) => {
             if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
             const user = await User.readAll(me);
-        return res.send(JSON.stringify(user));
+            return res.send(JSON.stringify(user));
         }
     } catch (err) {
         next(err);
