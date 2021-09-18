@@ -12,6 +12,9 @@ const config = require('config');
 
 const secret = config.get('jwt_secret_key');
 
+// Error handler
+const { TakeError } = require('../helpers/helpError');
+
 
 // ---------------------------------------------------------
 // ----------------- TABLE OF CONTENTS ---------------------
@@ -84,8 +87,6 @@ router.post('/login', async (req, res) => {
         return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
     }
 });
-
-
 
 //------------------------PUT-------------------------------
 // ----- (MEMBER) UPDATE own User
@@ -182,52 +183,47 @@ router.put('/delete/:userid', async (req, res) => {
 
 //------------------------GET-------------------------------
 // ----- (ADMIN) GET ALL Users
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
     try {
         const user = await User.readAll();
         return res.send(JSON.stringify(user));
     } catch (err) {
-        return res.status(500).send(JSON.stringify(
-            {errorMessage: err, 
-                placeOfError: [
-                    {place: "users: router.get"},
-                    {routerName: "(ADMIN) GET ALL Users"}
-                ]}));
+        next(err);
     }
 });
 
 // ----- (MEMBER) OWN User
-router.get('/:me', async (req, res) => {
+router.get('/:me', async (req, res, next) => {
     //URL segmet is :me
     let me;
-    if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
-        me = parseInt(req.params.me);
-        if (!me) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?mer= should refer an user id (integer)' }));
-    }
-
 
     try {
-        const tools = await User.readAll(me);
-        return res.send(JSON.stringify(tools));
+        if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+            me = parseInt(req.params.me);
+            if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+
+            const user = await User.readAll(me);
+        return res.send(JSON.stringify(user));
+        }
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
 
 // ----- (ADMIN) A specific User
 router.get('/:userid', async (req, res) => {
-    // need to call the Tool class for DB access...
-    let authorid;
-    if (req.query.author) {
-        authorid = parseInt(req.query.author);
-        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
-    }
-
+    //URL segmet is :userid
+    let userid;
     try {
-        const tools = await User.readAll(authorid);
-        return res.send(JSON.stringify(tools));
+        if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
+            me = parseInt(req.params.userid);
+            if (!userid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+
+            const user = await User.readAll(userid);
+        return res.send(JSON.stringify(user));
+        }
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
 

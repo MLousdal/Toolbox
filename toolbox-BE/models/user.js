@@ -6,6 +6,10 @@ const bcrypt = require('bcryptjs');
 const con = config.get('dbConfig_UCN');
 const salt = parseInt(config.get('saltRounds'));
 
+// Error Handlers
+// REMEMBER: CAN'T require a model that uses User.validate before the User-class have been exported. Meaning you can't use it in this case.
+const { TakeError, HandleIt } = require('../helpers/helpError');
+
 class User {
     // userObj: {userId, userName, userEmail, userPassword, userStatus}
     constructor(userObj) {
@@ -308,18 +312,20 @@ class User {
                     result.recordset.forEach((record, index) => {
                         const newUser = {
                             userId: record.userId,
-                            // userId: "asdasdas",
                             userName: record.userName,
                             userEmail: record.userEmail,
                             userStatus: record.userStatus
                         }
 
                         // Validate if newUser are in the right format and right info.
-                        const { error } = User.validate(newUser);
-                        if (error) throw { errorMessage: 'User validation, failed! Index: ' + index + ' ;Error: ' + error}; // Will also send where in the loop the error occured.
+                        const $validate = User.validate(newUser);
+                        if ($validate.error) throw new TakeError(500, 'User validation, failed! ErrorInfo' + $validate.error);
 
                         users.push(newUser);
                     });
+
+                    // If users are empty, then throw error because that means the user could not be found.
+                    if (users.length == 0) throw new TakeError(400, 'Bad Request: User not found!');
 
                     resolve(users);
                 } catch (error) {
@@ -330,6 +336,8 @@ class User {
         });
     }
 }
+
+
 
 // previously module.exports = Login;
 module.exports = User;
