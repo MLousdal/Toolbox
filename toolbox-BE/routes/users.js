@@ -42,15 +42,15 @@ router.post('/', async (req, res) => {
     try {
         // previously Login.validate(req.body)
         const { error } = User.validate(req.body);
-        if (error) throw { statusCode: 400, errorMessage: error };
+        if (error) throw new TakeError(400, "Validation error:" + error);
 
         // previously const loginObj = new Login(req.body);
-        const UserObj = new User(req.body);
-        // previously const user = await loginObj.create();
-        const User = await UserObj.create();
+        const userObj = new User(req.body);
+
+        const user = await userObj.create();
 
         // previously user
-        return res.send(JSON.stringify(User));
+        return res.send(JSON.stringify(user));
     } catch (err) {
         console.log(err);
         // need to make the condition check sensible...
@@ -192,31 +192,31 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-// ----- (MEMBER) OWN User
-router.get('/:me', async (req, res, next) => {
-    //URL segmet is :me
-    let me;
+// // ----- (MEMBER) OWN User
+// router.get('/:me', async (req, res, next) => {
+//     //URL segmet is :me
+//     let me;
 
-    try {
-        if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
-            me = parseInt(req.params.me);
-            if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+//     try {
+//         if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+//             me = parseInt(req.params.me);
+//             if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
-            const user = await User.readAll(me);
-            return res.send(JSON.stringify(user));
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+//             const user = await User.readAll(me);
+//             return res.send(JSON.stringify(user));
+//         }
+//     } catch (err) {
+//         next(err);
+//     }
+// });
 
 // ----- (ADMIN) A specific User
-router.get('/:userid', async (req, res) => {
+router.get('/:userid', async (req, res, next) => {
     //URL segmet is :userid
     let userid;
     try {
         if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
-            me = parseInt(req.params.userid);
+            userid = parseInt(req.params.userid);
             if (!userid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
             const user = await User.readAll(userid);

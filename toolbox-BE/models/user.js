@@ -295,8 +295,10 @@ class User {
                         result = await pool.request()
                             .input('userId', sql.Int(), userid)
                             .query(`
-                                SELECT u.userName, u.userEmail, u.userStatus
+                                SELECT u.userName, u.userEmail, u.userStatus, r.roleId, r.roleName
                                 FROM toolboxUser u 
+                                JOIN toolboxRole r
+                                    ON u.FK_role = r.roleId
                                 WHERE u.userId = @userId
                             `);
                     } else {
