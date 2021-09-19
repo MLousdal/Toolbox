@@ -228,10 +228,17 @@ class User {
     create() { 
         return new Promise((resolve, reject) => {
             (async () => {
-                // but first! --> check if user exists already in the system!
-                // *** code to check if user already exists in DB (based on userEmail)
+                // Check if the new user already exist in the DB:
                 try {
-                    const account = await Account.readByEmail(this);    // checking if <this> account is already in the DB (by userEmail)
+
+                } catch (err) {
+
+                }
+
+
+
+                try {
+                    const account = await User.readByEmail(this);    // checking if <this> account is already in the DB (by userEmail)
                     // if yes (aka no errors), then we have to abort creating it again --> REJECT with error: user exist
                     reject({ statusCode: 409, errorMessage: 'Conflict: user email is already in use.' })
                 } catch (error) {
@@ -307,6 +314,48 @@ class User {
                 sql.close();
             })();
         });
+    }
+
+    static test1() {
+        return new Promise ((resolve,reject) => {
+            (async () => {
+                // Test area!
+
+                try {
+                    const pool = await sql.connect(con);
+
+                    const result = await pool.request()
+                    .query(`
+                        IF NOT (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxUser u
+                                WHERE u.userid = 4
+                            ))
+                        BEGIN
+                            SELECT * 
+                            FROM toolboxRole r
+                        END
+                    `);
+                    console.log(result)
+                    
+                    // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
+                    if (result.recordset == undefined) throw new TakeError(500, 'The user already exists!');
+                    
+                    const set = result.recordset[0];
+                    const useResult = {
+                        info: set
+                    }
+                    resolve(useResult);
+                    // resolve(result);
+
+                } catch (err) {
+                    reject(err);
+                }
+
+                sql.close();
+            })();
+        })
     }
 
     static readAll(userid) {

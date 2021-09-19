@@ -195,8 +195,6 @@ router.get('/', async (req, res, next) => {
 // ----- (MEMBER) OWN User
 router.get('/:me', async (req, res, next) => {
     //URL segmet is :me
-    let me;
-
     try {
         if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
             me = parseInt(req.params.me);
@@ -229,7 +227,19 @@ router.get('/:userid', async (req, res, next) => {
 });
 
 
+// ********************************************************
+// ********************  TEST ROUTE  **********************
+// ********************************************************
+router.get('/test/test', async (req,res, next) => {
+    try {
+        const user = await User.test1();
+        return res.send(JSON.stringify(user));
 
+        console.log("Test running!")
+    } catch (err) {
+        next(err);
+    }
+})
 
 
 module.exports = router;
