@@ -66,18 +66,18 @@ router.post('/login', async (req, res) => {
     res.setHeader('Access-Control-Expose-Headers', 'x-authenticate-token');
     try {
         // previously Login.validate(req.body)
-        const { error } = User.validate(req.body);
+        const { error } = User.validateResponse(req.body);
         if (error) throw { statusCode: 400, errorMessage: error };
 
         // previously const loginObj = new Login(req.body)
-        const UserObj = new User(req.body);
+        const userObj = new User(req.body);
         // previously const user = await Login.readByEmail(loginObj)
-        const User = await User.checkCredentials(UserObj);
+        const user = await User.checkCredentials(userObj);
 
-        const token = await jwt.sign(User, secret);
+        const token = await jwt.sign(user, secret);
         res.setHeader('x-authenticate-token', token);
-        // previously user
-        return res.send(JSON.stringify(User));
+
+        return res.send(JSON.stringify(user));
 
     } catch (err) {
         console.log(err);

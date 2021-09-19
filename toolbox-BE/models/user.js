@@ -134,10 +134,10 @@ class User {
                     // ------------------
                     // ----- BCRYPT -----
                     // ------------------
-                        // Check if the the given token-password is correct.
-                        const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
-                        // If there was no match, throw an error.
-                        if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
+                        // // Check if the the given token-password is correct.
+                        // const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
+                        // // If there was no match, throw an error.
+                        // if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
 
                     // Create the object we are going to send back to the FE.
                     const set = result.recordset[0];
@@ -348,6 +348,9 @@ class User {
                     // Create array with user(s) where every user will be validated before being pushed to users[].
                     const users = [];
                     result.recordset.forEach((record, index) => {
+                        // Index could be used for things like:
+                        // -- How many users were found and give it to the FE...
+
                         const createUser = {
                             userId: record.userId,
                             userName: record.userName,
