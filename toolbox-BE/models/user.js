@@ -2,6 +2,7 @@ const sql = require('mssql');
 const config = require('config');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
+const _ = require('lodash');
 
 const con = config.get('dbConfig_UCN');
 const salt = parseInt(config.get('saltRounds'));
@@ -18,39 +19,25 @@ class User {
         this.userEmail = userObj.userEmail;
         this.userPassword = userObj.userPassword;
         this.userStatus = userObj.userStatus;
+        this.roleId = userObj.roleId;
+        this.roleName = userObj.roleName
     }
 
     // static validate(userObj)
     static validate(userObj) {
         const schema = Joi.object({
             userId: Joi.number()
-            .integer(),
-            userEmail: Joi.string()
-                .email()
-                .required(),
-            userPassword: Joi.string()
-                .min(1)
-                .max(255),
-            userName: Joi.string()
-                .alphanum()
-                .min(1)
-                .max(50),
-            userStatus: Joi.string()
-                .min(1)
-                .max(50)
-                .required()
-        });
-
-        return schema.validate(userObj);
-    }
-
-    static validateResponse(userResponse) {
-        const schema = Joi.object({
-            userId: Joi.number()
                 .integer()
                 .required(),
             userName: Joi.string()
                 .alphanum()
+                .min(1)
+                .max(50)
+                .required(),
+            userEmail: Joi.string()
+                .email()
+                .required(),
+            userStatus: Joi.string()
                 .min(1)
                 .max(50)
                 .required(),
@@ -63,7 +50,42 @@ class User {
                     .min(1)
                     .max(50)
                     .required()
-            }).required()
+            })
+        });
+
+        return schema.validate(userObj);
+    }
+
+    static validateResponse(userResponse) {
+        const schema = Joi.object({
+            userId: Joi.number()
+                .integer(),
+            userName: Joi.string()
+                .alphanum()
+                .min(1)
+                .max(50)
+                .required(),
+            userPassword: Joi.string()
+                .min(1)
+                .max(255)
+                .required(),
+            userEmail: Joi.string()
+                .email()
+                .required(),
+            userStatus: Joi.string()
+                .min(1)
+                .max(50)
+                .required(),
+            userRole: Joi.object({
+                roleId: Joi.number()
+                    .integer()
+                    .required(),
+                roleName: Joi.string()
+                    .alphanum()
+                    .min(1)
+                    .max(50)
+                    .required()
+            })
         });
 
         return schema.validate(userResponse);
@@ -84,11 +106,12 @@ class User {
                 try {
                     const pool = await sql.connect(con);
                     const result = await pool.request()
-                        .input('userEmail', sql.NVarChar(255), userObj.userEmail)
-                        // We are looking for a user with all the information needed:
-                        // First JOIN is to get the passwordValue that matches the userid.
-                        // Second JOIN is to get the Role that matches the user.
-                        // And it all have to match with the UserEmail.
+                        .input('userId', sql.Int(), userObj.userId)
+                        // Query Objectives:
+                            // -- We are looking for a user with all the information needed:
+                            // -- First JOIN is to get the passwordValue that matches the userid.
+                            // -- Second JOIN is to get the Role that matches the user.
+                            // -- And it all have to match with the UserId.
                         .query(`
                             SELECT u.userId, u.userName, r.roleId, r.roleName, p.passwordValue
                             FROM toolboxUser u
@@ -96,40 +119,46 @@ class User {
                                 ON u.userId = p.FK_userId
                             JOIN toolboxRole r
                                 ON u.FK_roleId = r.roleId
-                            WHERE u.userEmail = @userEmail
+                            WHERE u.userId = @userId
                         `);
+
+
                     console.log('(Class:USER) checkCredentials:', result);
 
+
                     // (No match) if there are nothing in the recordset[], then throw.
-                    if (!result.recordset[0]) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.'};
+                    if (!result.recordset[0]) throw new TakeError(404, 'User not found with provided credentials.');
                     // (Multiple matches) if there are more than 1 result = there are 2 or more users with the same information then throw.
-                    if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: 'Multiple hits of unique data. Corrupt database: Multiple of same user.'};
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Multiple hits of unique data. Corrupt database: Multiple of same user.');
 
-                    // Check if the the given token-password is correct.
-                    const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
-                    // If there was no match, throw an error.
-                    if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
+                    // ------------------
+                    // ----- BCRYPT -----
+                    // ------------------
+                        // Check if the the given token-password is correct.
+                        const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
+                        // If there was no match, throw an error.
+                        if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
 
-                    // Create the information into an object:
+                    // Create the object we are going to send back to the FE.
+                    const set = result.recordset[0];
                     const userResponse = {
-                        userId: result.recordset[0].userId,
-                        userName: result.recordset[0].userName,
+                        userId: set.userId,
+                        userName: set.userName,
+                        userEmail: set.userEmail,
+                        userStatus: set.userStatus,
                         userRole: {
-                            roleId: result.recordset[0].roleId,
-                            roleName: result.recordset[0].roleName
+                            roleId: set.roleId,
+                            roleName: set.roleName
                         }
                     }
-                    
-                    
-                    // check if the format is correct!
+                    // Before sending the object, we should look and see if has been formatted correctly.
                     const { error } = User.validateResponse(userResponse);
-                    if (error) throw { statusCode: 500, errorMessage: 'Corrupt user account informaion in database.' }
+                    if (error) throw new TakeError(500, 'Corrupt user account informaion in database.');
 
                     resolve(userResponse);
 
                 } catch (error) {
-                    console.log(error);
-                    reject('(Class:USER) checkCredentials: Error = ',error);
+                    reject(error);
                 }
 
                 sql.close();
@@ -192,7 +221,11 @@ class User {
     }
 
     // create() to send the data to the db
-    create() {
+
+    // ***************************************************************************************************
+    // **************** Brug flere try / catch i stedet for at have try(inden i error??) *****************
+    // ***************************************************************************************************
+    create() { 
         return new Promise((resolve, reject) => {
             (async () => {
                 // but first! --> check if user exists already in the system!
@@ -295,35 +328,42 @@ class User {
                         result = await pool.request()
                             .input('userId', sql.Int(), userid)
                             .query(`
-                                SELECT u.userName, u.userEmail, u.userStatus, r.roleId, r.roleName
+                                SELECT u.userId, u.userName, u.userEmail, u.userStatus, r.roleId, r.roleName
                                 FROM toolboxUser u 
                                 JOIN toolboxRole r
-                                    ON u.FK_role = r.roleId
+                                    ON u.FK_roleId = r.roleId
                                 WHERE u.userId = @userId
                             `);
                     } else {
                         result = await pool.request()
                             .query(`
-                                SELECT u.userId, u.userName, u.userEmail, u.userStatus
-                                FROM toolboxUser u 
+                                SELECT u.userId, u.userName, u.userEmail, u.userStatus, r.roleId, r.roleName
+                                FROM toolboxUser u
+                                JOIN toolboxRole r
+                                    ON u.FK_roleId = r.roleId
                                 ORDER BY u.userStatus ASC
                             `);
                     }
 
+                    // Create array with user(s) where every user will be validated before being pushed to users[].
                     const users = [];
                     result.recordset.forEach((record, index) => {
-                        const newUser = {
+                        const createUser = {
                             userId: record.userId,
                             userName: record.userName,
                             userEmail: record.userEmail,
-                            userStatus: record.userStatus
+                            userStatus: record.userStatus,
+                            userRole: {
+                                roleId: record.roleId,
+                                roleName: record.roleName
+                            }   
                         }
 
                         // Validate if newUser are in the right format and right info.
-                        const $validate = User.validate(newUser);
+                        const $validate = User.validate(createUser);
                         if ($validate.error) throw new TakeError(500, 'User validation, failed! ErrorInfo' + $validate.error);
 
-                        users.push(newUser);
+                        users.push(createUser);
                     });
 
                     // If users are empty, then throw error because that means the user could not be found.

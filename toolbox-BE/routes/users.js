@@ -41,10 +41,10 @@ router.post('/', async (req, res) => {
     
     try {
         // previously Login.validate(req.body)
-        const { error } = User.validate(req.body);
-        if (error) throw new TakeError(400, "Validation error:" + error);
+        const { error } = User.validateResponse(req.body);
+        if (error) throw new TakeError(400, "Bad Request:" + error);
 
-        // previously const loginObj = new Login(req.body);
+        // If the req.body is formatted correctly a new User will be created with that information.
         const userObj = new User(req.body);
 
         const user = await userObj.create();
@@ -192,23 +192,23 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-// // ----- (MEMBER) OWN User
-// router.get('/:me', async (req, res, next) => {
-//     //URL segmet is :me
-//     let me;
+// ----- (MEMBER) OWN User
+router.get('/:me', async (req, res, next) => {
+    //URL segmet is :me
+    let me;
 
-//     try {
-//         if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
-//             me = parseInt(req.params.me);
-//             if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+    try {
+        if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+            me = parseInt(req.params.me);
+            if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
-//             const user = await User.readAll(me);
-//             return res.send(JSON.stringify(user));
-//         }
-//     } catch (err) {
-//         next(err);
-//     }
-// });
+            const user = await User.readAll(me);
+            return res.send(JSON.stringify(user));
+        }
+    } catch (err) {
+        next(err);
+    }
+});
 
 // ----- (ADMIN) A specific User
 router.get('/:userid', async (req, res, next) => {
@@ -223,6 +223,7 @@ router.get('/:userid', async (req, res, next) => {
         return res.send(JSON.stringify(user));
         }
     } catch (err) {
+        console.log("THIS ERROR",err)
         next(err);
     }
 });
