@@ -15,7 +15,7 @@ const tools = require('./routes/tools');
 app.use(express.json());
 app.use(cors());
 app.use(setContentTypeJSON);
-app.use('/api/accounts', accounts);
+app.use('/api/tools', tools);
 
 // books --> tools
 app.use('/api/tools', tools);

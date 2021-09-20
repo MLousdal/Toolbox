@@ -39,14 +39,14 @@ const Tool = require('../models/tool');
 
 router.get('/', async (req, res) => {
     // need to call the Tool class for DB access...
-    let authorid;
-    if (req.query.author) {
-        authorid = parseInt(req.query.author);
-        if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
-    }
+    // let authorid;
+    // if (req.query.author) {
+    //     authorid = parseInt(req.query.author);
+    //     if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
+    // }
 
     try {
-        const tools = await Tool.readAll(authorid);
+        const tools = await Tool.readAll();
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
