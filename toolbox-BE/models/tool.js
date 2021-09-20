@@ -7,14 +7,15 @@ const Joi = require('joi');
 
 const _ = require('lodash');
 
-const Author = require('./author');
-
 class Tool {
     constructor(toolObj) {
-        this.toolid = toolObj.toolid;
-        this.title = toolObj.title;
-        this.year = toolObj.year;
-        this.link = toolObj.link;
+        this.toolId = toolObj.toolId;
+        this.toolTitle = toolObj.toolTitle;
+        this.toolLink = toolObj.toolLink;
+        this.toolDescription = toolObj.toolDescription;
+        this.categoryId = toolObj.categoryId;
+        this.categoryName = toolObj.categoryName;
+        
         if (toolObj.authors) this.authors = _.cloneDeep(toolObj.authors);
     }
 
@@ -28,7 +29,7 @@ class Tool {
 
     static validate(toolWannabeeObj) {
         const schema = Joi.object({
-            toolid: Joi.number()
+            toolId: Joi.number()
                 .integer()
                 .min(1),
             toolTitle: Joi.string()
@@ -41,17 +42,13 @@ class Tool {
             toolDescription: Joi.string()
                 .max(255)
                 .allow(null),
-            category: Joi.array()
-                .items(
-                    Joi.object({
-                        categoryid: Joi.number()
-                            .integer()
-                            .min(1)
-                            .required(),
-                        categoryname: Joi.string()
-                            .max(50)
-                    })
-                )
+            category: Joi.object({
+                categoryId: Joi.number()
+                    .integer()
+                    .min(1)
+                    .required(),
+                categoryName: Joi.string()
+                    .max(50)})
         });
 
         return schema.validate(toolWannabeeObj);
@@ -84,24 +81,6 @@ class Tool {
                                 ON t.FK_categoryId = c.categoryId
                             WHERE t.FK_userid = @userid
                             `);
-                        //     .query(`
-                        //     // SELECT b.toolid, b.title, b.year, b.link, a.authorid, a.firstname, a.lastname 
-                        //     // FROM liloTool b
-                        //     // JOIN liloToolAuthor ba
-                        //     //     ON b.toolid = ba.FK_toolid
-                        //     // JOIN liloAuthor a
-                        //     //     ON ba.FK_authorid = a.authorid
-                        //     // WHERE b.toolid IN (
-                        //     //     SELECT b.toolid
-                        //     //     FROM lilotool b
-                        //     //     JOIN liloToolAuthor ba
-                        //     //         ON b.toolid = ba.FK_toolid
-                        //     //     JOIN liloAuthor a
-                        //     //         ON ba.FK_authorid = a.authorid
-                        //     //     WHERE a.authorid = @authorid
-                        //     // )
-                        //     // ORDER BY b.toolid, a.authorid
-                        // `);
                     } else {
                         result = await pool.request()
                             .query(`
@@ -109,77 +88,42 @@ class Tool {
                         JOIN toolboxCategory c
                             ON t.FK_categoryId = c.categoryId
                         `);
-
-                        //     .query(`
-                        //     SELECT b.toolid, b.title, b.year, b.link, a.authorid, a.firstname, a.lastname 
-                        //     FROM liloTool b
-                        //     JOIN liloToolAuthor ba
-                        //         ON b.toolid = ba.FK_toolid
-                        //     JOIN liloAuthor a
-                        //         ON ba.FK_authorid = a.authorid
-                        //     ORDER BY b.toolid, a.authorid
-                        // `);
                     }
 
                     const tools = [];   // this is NOT validated yet
                     let lastToolIndex = -1;
+
                     result.recordset.forEach(record => {
                         const newTool = {
-                            toolid: record.toolid,
+                            toolId: record.toolId,
                             toolTitle: record.toolTitle,
                             toolLink: record.toolLink,
                             toolDescription: record.toolDescription,
                             category:
                             {
-                                categoryid: record.categoryid,
-                                categoryname: record.categoryname
+                                categoryId: record.categoryId,
+                                categoryName: record.categoryName
                             }
-
                         }
 
                         tools.push(newTool);
-
-                        // if (tools[lastToolIndex] && record.toolid == tools[lastToolIndex].toolid) {
-                        //     console.log(`Tool with id ${record.toolid} already exists.`);
-                        //     const newAuthor = {
-                        //         authorid: record.authorid,
-                        //         firstname: record.firstname,
-                        //         lastname: record.lastname
-                        //     }
-                        //     tools[lastToolIndex].authors.push(newAuthor);
-                        // } else {
-                        //     console.log(`Tool with id ${record.toolid} is a new tool.`)
-                        //     const newTool = {
-                        //         toolid: record.toolid,
-                        //         title: record.title,
-                        //         year: record.year,
-                        //         link: record.link,
-                        //         authors: [
-                        //             {
-                        //                 authorid: record.authorid,
-                        //                 firstname: record.firstname,
-                        //                 lastname: record.lastname
-                        //             }
-                        //         ]
-                        //     }
-                        //     tools.push(newTool);
-                        //     lastToolIndex++;
-                        // }
                     });
 
-                    // const validtools = [];
-                    // tools.forEach(tool => {
-                    //     const { error } = Tool.validate(newTool);
-                    //     if (error) throw { errorMessage: `Tool.validate failed.` };
+                    const validtools = [];
+                    tools.forEach(tool => {
+                        const { error } = Tool.validate(tool);
+                        if (error) throw { errorMessage: `Tool.validate failed.` };
 
-                    //     validtools.push(new Tool(newTool));
-                    // });
+                        // validtools.push(new Tool(newTool));
+                        validtools.push(tool);
+                    });
 
-                    // resolve(validtools);
-                    resolve(tools);
+                    resolve(validtools);
+                    // resolve(tools);
 
                 } catch (error) {
                     reject(error);
+                    console.log(error)
                 }
 
                 sql.close();

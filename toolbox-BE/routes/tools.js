@@ -63,7 +63,7 @@ router.get('/:toolid', async (req, res) => {
     if (error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
     try {
-        const tool = await Tool.readById(req.params.toolid);
+        const tool = await Tool.readByAll(req.params.toolid);
         return res.send(JSON.stringify(tool));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
