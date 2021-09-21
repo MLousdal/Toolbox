@@ -61,29 +61,37 @@ router.post('/', async (req, res, next) => {
 
 //          POST /api/Users/login (LOGIN)
 // previously '/'
-router.post('/login', async (req, res) => {
-    res.setHeader('Access-Control-Expose-Headers', 'x-authenticate-token');
+router.post('/login', async (req, res, next) => {
+
+    //Allows a "custom token" to be used.
+    res.setHeader('Access-Control-Expose-Headers', 'toolbox-token');
+
     try {
+        // Is the data from the FE login, correctly formated?
+        const { error } = User.validate_login(req.body);
+        if (error) throw new TakeError(400, 'Bad Request: ' + error);
 
-        const { error } = User.validateResponse(req.body);
-        if (error) throw { statusCode: 400, errorMessage: error };
-
-        // previously const loginObj = new Login(req.body)
+        // create new User to check if it exist in the DB, and if there is more than 1!?
         const userObj = new User(req.body);
-        // previously const user = await Login.readByEmail(loginObj)
         const user = await User.checkCredentials(userObj);
 
+        // If there are only 1 user and the data given are correct, we give asign a matching token, and send it with the response(user and the token)
         const token = await jwt.sign(user, secret);
-        res.setHeader('x-authenticate-token', token);
+        res.setHeader('toolbox-token', token);
 
         return res.send(JSON.stringify(user));
 
     } catch (err) {
+        next(err);
         console.log(err);
+
+        // ***************************************************
+        // ******************** CHECK ************************
+        // ***************************************************
         // need to make the condition check sensible...
-        if (!err.statusCode) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
-        if (err.statusCode != 400) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
-        return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
+        // if (!err.statusCode) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
+        // if (err.statusCode != 400) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
+        // return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
     }
 });
 

@@ -1,16 +1,16 @@
-const sql = require('mssql');
-const config = require('config');
-const Joi = require('joi');
-const bcrypt = require('bcryptjs');
-const _ = require('lodash');
+const 
+sql = require('mssql'),
+config = require('config'),
+Joi = require('joi'),
+bcrypt = require('bcryptjs'),
+_ = require('lodash'),
 
-const con = config.get('dbConfig_UCN');
-const salt = parseInt(config.get('saltRounds'));
+con = config.get('dbConfig_UCN'),
+salt = parseInt(config.get('saltRounds')),
 
 // Error Handlers
 // REMEMBER: CAN'T require a model that uses User.validate before the User-class have been exported. Meaning you can't use it in this case.
-const { TakeError, HandleIt } = require('../helpers/helpError');
-const { countBy } = require('lodash');
+{ TakeError } = require('../helpers/helpError');
 
 class User {
     // userObj: {userId, userName, userEmail, userPassword, userStatus}
@@ -26,6 +26,24 @@ class User {
         // *********************************************************************************************************************
         // Can't easily create a nested object with a class. And not sure if we need anything else than the name,email,password?
         // The constructor will only be used when creating a new user?? Right?
+    }
+
+    static validate_login (loginObj) {
+        const schema = Joi.object({
+            userEmail: Joi
+                .string()
+                .email()
+                .min(1)
+                .max(255)
+                .required(),
+            userPassword: Joi
+            .string()
+            .min(1)
+            .max(255)
+            .required()
+        })
+
+        return schema.validate(loginObj);
     }
 
     // static validate(userObj)
@@ -107,14 +125,16 @@ class User {
                 // CLOSE THE DB CONNECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!
 
                 try {
-                    const pool = await sql.connect(con);
-                    const result = await pool.request()
-                        .input('userId', sql.Int(), userObj.userId)
+                    const 
+                    pool = await sql.connect(con),
+                    result = await pool.request()
+                        .input('userEmail', sql.Int(), userObj.userEmail)
                         // Query Objectives:
                             // -- We are looking for a user with all the information needed:
-                            // -- First JOIN is to get the passwordValue that matches the userid.
+                            // -- First JOIN is to get the passwordValue that matches the userid (via the user found through the email).
+                                // -- The password is used to check via bcrypt on BE with the one recieved from the FE.
                             // -- Second JOIN is to get the Role that matches the user.
-                            // -- And it all have to match with the UserId.
+                            // -- And it all have to match with the userEmail.
                         .query(`
                             SELECT u.userId, u.userName, r.roleId, r.roleName, p.passwordValue
                             FROM toolboxUser u
@@ -122,29 +142,27 @@ class User {
                                 ON u.userId = p.FK_userId
                             JOIN toolboxRole r
                                 ON u.FK_roleId = r.roleId
-                            WHERE u.userId = @userId
+                            WHERE u.userEmail = @userEmail
                         `);
+                    console.log(result);
 
-
-                    console.log('(Class:USER) checkCredentials:', result);
-
-
-                    // (No match) if there are nothing in the recordset[], then throw.
-                    if (!result.recordset[0]) throw new TakeError(404, 'User not found with provided credentials.');
+                    // (No match) if there is no recordset[0], then throw.
+                    if (!result.recordset[0]) throw new TakeError(404, 'Not Found: User not found with provided credentials!');
                     // (Multiple matches) if there are more than 1 result = there are 2 or more users with the same information then throw.
-                    if (result.recordset.length > 1) throw new TakeError(500, 'Multiple hits of unique data. Corrupt database: Multiple of same user.');
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Multiple hits of unique data. Corrupt database: Multiple of same user.');
 
                     // ------------------
                     // ----- BCRYPT -----
                     // ------------------
                         // // Check if the the given token-password is correct.
-                        // const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
+                        const bcrypt_result = await bcrypt.compare(userObj.userPassword, result.recordset[0].passwordValue);
                         // // If there was no match, throw an error.
-                        // if (!bcrypt_result) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
+                        if (!bcrypt_result) throw new TakeError(404, 'Not Found: User with the provided credentials could not be found!');
 
                     // Create the object we are going to send back to the FE.
-                    const set = result.recordset[0];
-                    const userResponse = {
+                    const 
+                    set = result.recordset[0],
+                    userResponse = {
                         userId: set.userId,
                         userName: set.userName,
                         userEmail: set.userEmail,
@@ -153,74 +171,18 @@ class User {
                             roleId: set.roleId,
                             roleName: set.roleName
                         }
-                    }
+                    },
                     // Before sending the object, we should look and see if has been formatted correctly.
-                    const { error } = User.validateResponse(userResponse);
-                    if (error) throw new TakeError(500, 'Corrupt user account informaion in database.');
+                    { error } = User.validateResponse(userResponse);
+                    if (error) throw new TakeError(500, 'Internal Server Error: Corrupt user account informaion in database!');
 
                     resolve(userResponse);
-
                 } catch (error) {
                     reject(error);
                 }
-
                 sql.close();
             })();
         });
-    }
-
-    // Not used, because the DB checks for dublicates?
-    static readByEmail(accountObj) {
-        // return new Promise((resolve, reject) => {
-        //     (async () => {
-        //         // connect to DB
-        //         // query the DB (SELECT WHERE userEmail)
-        //         // check if there is ONE result --> good
-        //         //      else throw error
-        //         // check format (validateResponse)
-        //         // resolve with accountResponse
-        //         // if any errors reject with error
-        //         // CLOSE THE DB CONNECTION
-
-        //         try {
-        //             const pool = await sql.connect(con);
-        //             const result = await pool.request()
-        //                 .input('userEmail', sql.NVarChar(255), accountObj.userEmail)
-        //                 .query(`
-        //                     SELECT u.userId, u.userName, r.roleId, r.roleName
-        //                     FROM toolboxUser u
-        //                     JOIN toolboxRole r
-        //                         ON u.FK_roleId = r.roleId
-        //                     WHERE u.userEmail = @userEmail 
-        //                 `);
-        //             console.log(result);
-
-        //             // error contains statusCode: 404 if not found! --> important in create(), see below
-        //             if (!result.recordset[0]) throw { statusCode: 404, errorMessage: 'User not found with provided credentials.' }
-        //             if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: 'Multiple hits of unique data. Corrupt database.' }
-
-        //             const accountResponse = {
-        //                 userId: result.recordset[0].userId,
-        //                 userName: result.recordset[0].userName,
-        //                 userRole: {
-        //                     roleId: result.recordset[0].roleId,
-        //                     roleName: result.recordset[0].roleName
-        //                 }
-        //             }
-
-        //             const { error } = Account.validateResponse(accountResponse);
-        //             if (error) throw { statusCode: 500, errorMessage: 'Corrupt user account informaion in database.' }
-
-        //             resolve(accountResponse);
-
-        //         } catch (error) {
-        //             console.log(error);
-        //             reject(error);
-        //         }
-
-        //         sql.close();
-        //     })();
-        // });
     }
 
     // create() to send the data to the db
@@ -271,10 +233,10 @@ class User {
                     console.log(result)
                     
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
-                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided USER-EMAIL or USER-NAME, are already in use!');
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
                     
                     const
-                    set = result.recordset[0],
+                    set = result.recordset[0], 
                     useResult = {
                         userId: set.userId,
                         userName: set.userName,
@@ -286,8 +248,7 @@ class User {
                     },
                     // Is the data we got back from the DB formatted correctly?
                     { error } = User.validateResponse(useResult);
-                    console.log(error)
-                    if (error) throw new TakeError(500, 'Corrupt: User account informaion in database is corrupted!');
+                    if (error) throw new TakeError(500, 'Internal Server Error: User account informaion in database is corrupted!');
 
                     resolve(useResult);
                 } catch (err) {
