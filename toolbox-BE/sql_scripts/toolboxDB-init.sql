@@ -189,7 +189,7 @@ VALUES
     ('Growth design', 'Get product tips in a comic book format you’ll love to read.', 'https://growth.design/', 'active', 1, 2),
     ('Miro', 'The online collaborative whiteboard platform to bring teams together, anytime, anywhere.', 'https://miro.com/', 'active', 1, 2),
     ('Hotjar', 'Understand how users behave on your site, what they need, and how they feel, fast.', 'https://www.hotjar.com/', 'active', 1, 2),
-    ('Persona', 'One platform, all the building blocks you need to create the ideal experience', 'https://withpersona.com/', 1, 2), 
+    ('Persona', 'One platform, all the building blocks you need to create the ideal experience', 'https://withpersona.com/', 'active', 1, 2), 
     ('SASS', 'CSS with superpowers', 'https://sass-lang.com/', 'active', 1, 3),
     ('Parcel', 'Parcel is a compiler for all your code, regardless of the language or toolchain.', 'https://v2.parceljs.org/', 'active', 1, 3),
     ('Squoosh', 'Super good image compressor', 'https://squoosh.app/', 'active', 1, 3),

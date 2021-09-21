@@ -36,27 +36,26 @@ const { TakeError } = require('../helpers/helpError');
 
 //------------------------POST-------------------------------
 //          POST /api/Users (SIGNUP)
-// previously '/signup'
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
     
     try {
         // previously Login.validate(req.body)
         const { error } = User.validateResponse(req.body);
         if (error) throw new TakeError(400, "Bad Request:" + error);
 
+        const
         // If the req.body is formatted correctly a new User will be created with that information.
-        const userObj = new User(req.body);
-
-        const user = await userObj.create();
-
-        // previously user
+        userObj = new User(req.body),
+        // - That way we can use the method: create() to use the userObj to make a .query().
+        user = await userObj.create();
+        // If .create() have:
+            // -- Checked for dublicate users
+            // -- INSERT INTO database correctly
+            // -- Validated the object we created with the data from the database
+        // Then we can return the newly created user to the FE!
         return res.send(JSON.stringify(user));
     } catch (err) {
-        console.log(err);
-        // need to make the condition check sensible...
-        if (!err.statusCode) return res.status(500).send(JSON.stringify({ errorMessage: err }));
-        if (err.statusCode != 400) return res.status(err.statusCode).send(JSON.stringify({ errorMessage: err }));
-        return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
+        next(err);
     }
 });
 
@@ -65,7 +64,7 @@ router.post('/', async (req, res) => {
 router.post('/login', async (req, res) => {
     res.setHeader('Access-Control-Expose-Headers', 'x-authenticate-token');
     try {
-        // previously Login.validate(req.body)
+
         const { error } = User.validateResponse(req.body);
         if (error) throw { statusCode: 400, errorMessage: error };
 
