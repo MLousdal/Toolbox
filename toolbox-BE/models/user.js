@@ -128,7 +128,7 @@ class User {
                     const 
                     pool = await sql.connect(con),
                     result = await pool.request()
-                        .input('userEmail', sql.Int(), userObj.userEmail)
+                        .input('userEmail', sql.NVarChar(50), userObj.userEmail)
                         // Query Objectives:
                             // -- We are looking for a user with all the information needed:
                             // -- First JOIN is to get the passwordValue that matches the userid (via the user found through the email).
@@ -136,7 +136,7 @@ class User {
                             // -- Second JOIN is to get the Role that matches the user.
                             // -- And it all have to match with the userEmail.
                         .query(`
-                            SELECT u.userId, u.userName, r.roleId, r.roleName, p.passwordValue
+                            SELECT u.userId, u.userName, u.userEmail, u.userStatus, r.roleId, r.roleName, p.passwordValue
                             FROM toolboxUser u
                             JOIN toolboxPassword p
                                 ON u.userId = p.FK_userId

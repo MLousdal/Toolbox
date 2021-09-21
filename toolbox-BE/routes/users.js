@@ -3,17 +3,24 @@
 //      POST    /api/Users/login
 //      POST    /api/Users
 
-const express = require('express');
-const router = express.Router();
+const 
+express = require('express'),
+router = express.Router(),
 
-const User = require('../models/user');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+User = require('../models/user'),
+jwt = require('jsonwebtoken'),
+config = require('config'),
 
-const secret = config.get('jwt_secret_key');
+secret = config.get('jwt_secret_key'),
+
+// Middleware
+auth = require('../middleware/authenticate'),
+auth_member_plus = require('../middleware/member_plus'),
+memberPlus = [auth, auth_member_plus],
+
 
 // Error handler
-const { TakeError } = require('../helpers/helpError');
+{ TakeError } = require('../helpers/helpError');
 
 
 // ---------------------------------------------------------
@@ -61,8 +68,9 @@ router.post('/', async (req, res, next) => {
 
 //          POST /api/Users/login (LOGIN)
 // previously '/'
-router.post('/login', async (req, res, next) => {
+router.post('/login', memberPlus, async (req, res, next) => {
 
+    console.log("ROUTER req.body: ", req.user)
     //Allows a "custom token" to be used.
     res.setHeader('Access-Control-Expose-Headers', 'toolbox-token');
 
@@ -73,6 +81,7 @@ router.post('/login', async (req, res, next) => {
 
         // create new User to check if it exist in the DB, and if there is more than 1!?
         const userObj = new User(req.body);
+        // Check the format, and if the password is a match.
         const user = await User.checkCredentials(userObj);
 
         // If there are only 1 user and the data given are correct, we give asign a matching token, and send it with the response(user and the token)
@@ -80,7 +89,6 @@ router.post('/login', async (req, res, next) => {
         res.setHeader('toolbox-token', token);
 
         return res.send(JSON.stringify(user));
-
     } catch (err) {
         next(err);
         console.log(err);
@@ -237,10 +245,11 @@ router.get('/:userid', async (req, res, next) => {
 // ********************************************************
 // ********************  TEST ROUTE  **********************
 // ********************************************************
-router.get('/test/test', async (req,res, next) => {
+router.get('/test/test', [auth], async (req,res, next) => {
     try {
-        const user = await User.test1();
-        return res.send(JSON.stringify(user));
+        // const user = await User.test1();
+        // return res.send(JSON.stringify(user));
+
 
         console.log("Test running!")
     } catch (err) {

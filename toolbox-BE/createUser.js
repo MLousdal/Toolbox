@@ -17,4 +17,11 @@ obj2 =
     "userName" : "lordwoopty",
     "userEmail" : "lordwoopty@email.com",
     "userPassword" : "1234"
+},
+
+obj3 = 
+{
+    "userName" : "hamsterGiant",
+    "userEmail" : "hammerking@email.com",
+    "userPassword" : "hamster"
 };
