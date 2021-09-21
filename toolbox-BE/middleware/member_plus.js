@@ -13,6 +13,6 @@ module.exports = async (req, res, next) => {
             throw new TakeError(401, 'Unauthorized: This user do not have access!')
         }
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
