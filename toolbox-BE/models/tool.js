@@ -212,7 +212,7 @@ class Tool {
                 // › › query DB (INSERT Tool, SELECT Tool WHERE SCOPE_IDENTITY(), INSERT ToolAuthor)
                 // › › check if exactly one result
                 // › › keep toolid safe
-                // › › queryDB* (INSERT ToolAuthor) as many more times needed (with oolid)
+                // › › queryDB* (INSERT ToolAuthor) as many more times needed (with toolid)
                 // › › ((query DB query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid))) ==>
                 // › ›      close the DB because we are calling 
                 // › ›             Tool.readById(toolid)
@@ -288,44 +288,44 @@ class Tool {
         });
     }
 
-    static delete(toolid) {
-        return new Promise((resolve, reject) => {
-            (async () => {
-                // › › connect to DB
-                // › › query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid) <-- moving this before the DB connection, calling readById instead
-                // › › query DB (DELETE ToolAuthor WHERE toolid, DELETE Tool WHERE toolid)
-                // › › restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
-                // › › validate objects
-                // › › close DB connection
+    // static delete(toolid) {
+    //     return new Promise((resolve, reject) => {
+    //         (async () => {
+    //             // › › connect to DB
+    //             // › › query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid) <-- moving this before the DB connection, calling readById instead
+    //             // › › query DB (DELETE ToolAuthor WHERE toolid, DELETE Tool WHERE toolid)
+    //             // › › restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
+    //             // › › validate objects
+    //             // › › close DB connection
 
-                try {
-                    const tool = await Tool.readById(toolid);
+    //             try {
+    //                 const tool = await Tool.readById(toolid);
 
-                    const pool = await sql.connect(con);
-                    const result = await pool.request()
-                        .input('toolid', sql.Int(), toolid)
-                        .query(`
-                        DELETE liloToolAuthor
-                        WHERE FK_toolid = @toolid;
+    //                 const pool = await sql.connect(con);
+    //                 const result = await pool.request()
+    //                     .input('toolid', sql.Int(), toolid)
+    //                     .query(`
+    //                     DELETE liloToolAuthor
+    //                     WHERE FK_toolid = @toolid;
 
-                        DELETE liloLoan
-                        WHERE FK_toolid = @toolid;
+    //                     DELETE liloLoan
+    //                     WHERE FK_toolid = @toolid;
 
-                        DELETE liloTool
-                        WHERE toolid = @toolid
-                    `);
+    //                     DELETE liloTool
+    //                     WHERE toolid = @toolid
+    //                 `);
 
-                    resolve(tool);
+    //                 resolve(tool);
 
-                } catch (error) {
-                    reject(error);
-                }
+    //             } catch (error) {
+    //                 reject(error);
+    //             }
 
-                sql.close();
+    //             sql.close();
 
-            })();
-        });
-    }
+    //         })();
+    //     });
+    // }
 
     update() {
         return new Promise((resolve, reject) => {
@@ -356,19 +356,28 @@ class Tool {
                         .input('toolid', sql.Int(), this.toolid)
                         .input('authorid', sql.Int(), this.authors[0].authorid)
                         .query(`
-                            UPDATE liloTool
+                            UPDATE Tool
                             SET
-                                title = @title,
-                                year = @year,
-                                link = @link
+                                toolTitle = @toolTitle,
+                                toolLink = @toolLink,
                             WHERE toolid = @toolid;
-
-                            DELETE liloToolAuthor
-                            WHERE FK_toolid = @toolid;
-
-                            INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
-                            VALUES (@toolid, @authorid)
                         `);
+
+
+                        // .query(`
+                        //     UPDATE liloTool
+                        //     SET
+                        //         title = @title,
+                        //         year = @year,
+                        //         link = @link
+                        //     WHERE toolid = @toolid;
+
+                        //     DELETE liloToolAuthor
+                        //     WHERE FK_toolid = @toolid;
+
+                        //     INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
+                        //     VALUES (@toolid, @authorid)
+                        // `);
 
                     this.authors.forEach(async (author, index) => {
                         if (index > 0) {
