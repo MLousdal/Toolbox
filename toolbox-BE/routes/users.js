@@ -15,8 +15,12 @@ secret = config.get('jwt_secret_key'),
 
 // Middleware
 auth = require('../middleware/authenticate'),
+
+// Member +
 auth_member_plus = require('../middleware/member_plus'),
 memberPlus = [auth, auth_member_plus],
+
+// Admin
 
 
 // Error handler
@@ -41,7 +45,8 @@ memberPlus = [auth, auth_member_plus],
 // /api/Users/:UserId
 // ---------------------------------------------------------
 
-//------------------------POST-------------------------------
+//------------------------ POST -------------------------------
+
 //          POST /api/Users (SIGNUP)
 router.post('/', async (req, res, next) => {
     
@@ -67,7 +72,6 @@ router.post('/', async (req, res, next) => {
 });
 
 //          POST /api/Users/login (LOGIN)
-// previously '/'
 router.post('/login', memberPlus, async (req, res, next) => {
 
     console.log("ROUTER req.body: ", req.user)
@@ -103,7 +107,8 @@ router.post('/login', memberPlus, async (req, res, next) => {
     }
 });
 
-//------------------------PUT-------------------------------
+//------------------------ PUT -------------------------------
+
 // ----- (MEMBER) UPDATE own User
 router.put('/me', async (req, res) => {
     // › › validate req.params.toolid as toolid
@@ -196,7 +201,8 @@ router.put('/delete/:userid', async (req, res) => {
     }
 });
 
-//------------------------GET-------------------------------
+//------------------------ GET -------------------------------
+
 // ----- (ADMIN) GET ALL Users
 router.get('/', async (req, res, next) => {
     try {
