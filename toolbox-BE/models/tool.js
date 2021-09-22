@@ -1,11 +1,15 @@
-const config = require('config');
+const
+config = require('config'),
 
-const sql = require('mssql');
-const con = config.get('dbConfig_UCN');
+sql = require('mssql'),
+con = config.get('dbConfig_UCN'),
 
-const Joi = require('joi');
-
-const _ = require('lodash');
+Joi = require('joi'),
+ _ = require('lodash'),
+ 
+ 
+// Error Handlers
+ { TakeError } = require('../helpers/helpError');
 
 class Tool {
     constructor(toolObj) {
@@ -15,8 +19,6 @@ class Tool {
         this.toolDescription = toolObj.toolDescription;
         this.categoryId = toolObj.categoryId;
         this.categoryName = toolObj.categoryName;
-        
-        if (toolObj.authors) this.authors = _.cloneDeep(toolObj.authors);
     }
 
     copy(toolObj) {
@@ -31,10 +33,12 @@ class Tool {
         const schema = Joi.object({
             toolId: Joi.number()
                 .integer()
-                .min(1),
+                .min(1)
+                .required(),
             toolTitle: Joi.string()
                 .min(1)
-                .max(255),
+                .max(255)
+                .required(),
             toolLink: Joi.string()
                 .uri()
                 .max(255)
@@ -48,86 +52,83 @@ class Tool {
                     .min(1)
                     .required(),
                 categoryName: Joi.string()
-                    .max(50)})
+                    .max(50)
+            })
         });
 
         return schema.validate(toolWannabeeObj);
     }
 
-    static readAll(userid) {
+    static readAll(toolId) {
         return new Promise((resolve, reject) => {
             (async () => {
-                // › › connect to DB
-                // › › create SQL query string (SELECT Tool JOIN ToolAuthor JOIN Author)
-                // › › if authorid, add WHERE authorid to query string
+                  // › › connect to DB
+                // › › create SQL query string (ALL tools / 1 specific tool via toolId)
+                // › › if toolid is true, add WHERE userid to query string to only find that user.
                 // › › query DB with query string
-                // › › restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
+                // › › restructure DB result into the object structure needed
                 // › › validate objects
                 // › › close DB connection
-
-                // DISCLAIMER: need to look up how to SELECT with the results of another SELECT
-                //      right now only the author with the authorid is listed on the tool in the response
 
                 try {
                     const pool = await sql.connect(con);
                     let result;
 
-                    if (userid) {
+                    if (toolId) {
                         result = await pool.request()
-                            .input('userid', sql.Int(), userid)
+                            .input('toolId', sql.Int(), toolId)
                             .query(`
-                            SELECT * FROM toolboxTool t
-                            JOIN toolboxCategory c
-                                ON t.FK_categoryId = c.categoryId
-                            WHERE t.FK_userid = @userid
+                                SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                                FROM toolboxTool t 
+                                JOIN toolboxCategory c
+                                    ON t.FK_categoryId = c.categoryId
+                                WHERE t.toolId = @toolId AND t.toolStatus = 'active'
                             `);
                     } else {
                         result = await pool.request()
                             .query(`
-                        SELECT * FROM toolboxTool t
-                        JOIN toolboxCategory c
-                            ON t.FK_categoryId = c.categoryId
-                        `);
+                                SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                                FROM toolboxTool t 
+                                JOIN toolboxCategory c
+                                    ON t.FK_categoryId = c.categoryId
+                                WHERE t.toolStatus = 'active'
+                                ORDER BY c.categoryId ASC
+                            `);
                     }
+                    console.log(result)
 
-                    const tools = [];   // this is NOT validated yet
-                    let lastToolIndex = -1;
+                    // Create array with tools(s) where every tool will be validated before being pushed to tools[].
+                    const tools = [];
+                    result.recordset.forEach((record, index) => {
+                        // Index could be used for things like:
+                        // -- How many tools were found and give it to the FE...
 
-                    result.recordset.forEach(record => {
-                        const newTool = {
+                        const createTool = {
                             toolId: record.toolId,
                             toolTitle: record.toolTitle,
-                            toolLink: record.toolLink,
                             toolDescription: record.toolDescription,
-                            category:
-                            {
+                            toolLink: record.toolLink,
+                            category: {
                                 categoryId: record.categoryId,
                                 categoryName: record.categoryName
                             }
                         }
 
-                        tools.push(newTool);
+                        // Validate if newUser are in the right format and right info.
+                        const $validate = Tool.validate(createTool);
+                        if ($validate.error) throw new TakeError(500, 'Tool validation, failed! ErrorInfo' + $validate.error);
+
+                        tools.push(createTool);
                     });
 
-                    const validtools = [];
-                    tools.forEach(tool => {
-                        const { error } = Tool.validate(tool);
-                        if (error) throw { errorMessage: `Tool.validate failed.` };
+                    // If tools are empty, then throw error because that means the tools could not be found.
+                    if (tools.length == 0) throw new TakeError(400, 'Bad Request: Tools not found!');
 
-                        // validtools.push(new Tool(newTool));
-                        validtools.push(tool);
-                    });
-
-                    resolve(validtools);
-                    // resolve(tools);
-
-                } catch (error) {
-                    reject(error);
-                    console.log(error)
+                    resolve(tools);
+                } catch (err) {
+                    reject(err);
                 }
-
                 sql.close();
-
             })();
         });
     }

@@ -1,12 +1,8 @@
-const express = require('express');
-const router = express.Router();
+const 
+express = require('express'),
+router = express.Router(),
 
-const Tool = require('../models/tool');
-//const Author = require('../models/author');
-
-//const Tool = require('../models/tool');
-//const Author = require('../models/author');
-
+Tool = require('../models/tool'),
 
 // Middleware
 auth = require('../middleware/authenticate'),
@@ -49,23 +45,18 @@ memberPlus = [auth, auth_member_plus],
 
 //------------------------GET-------------------------------
 
-//         GET /api/tools (All tools)
-
-router.get('/', async (req, res) => {
-    // need to call the Tool class for DB access...
-    // let authorid;
-    // if (req.query.author) {
-    //     authorid = parseInt(req.query.author);
-    //     if (!authorid) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: ?author= should refer an author id (integer)' }));
-    // }
-
+//  GET /api/tools (All tools)
+router.get('/', async (req, res,next) => {
     try {
         const tools = await Tool.readAll();
         return res.send(JSON.stringify(tools));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err)
     }
 });
+
+
+//  GET /api/tools/favorit/:me -- Get all tools that a user has as favorits
 router.get('/', async (req, res, next) => {
     try {
         const user = await Tool.readAll();
@@ -77,12 +68,20 @@ router.get('/', async (req, res, next) => {
 
 
 //        GET api/tools/:toolID (Specific tool)
+router.get('/:toolid', async (req, res, next) => {
+    // same as users/:userid
+    let toolid;
+    try {
+        if (req.params.toolid) { // Params stores the values from URL segmets like :me as params.me
+            toolid = parseInt(req.params.toolid);
+            if (!toolid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
-router.get('/:toolid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › call await Tool.readById(req.params.toolid)
-    const { error } = Tool.validate(req.params);
-    if (error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+            const tool = await Tool.readAll(toolid);
+            return res.send(JSON.stringify(tool));
+        }
+    } catch (err) {
+        next(err);
+    }
 
     try {
         const tool = await Tool.readByAll(req.params.toolid);
