@@ -74,7 +74,7 @@ router.get('/:toolid', async (req, res, next) => {
     try {
         if (req.params.toolid) { // Params stores the values from URL segmets like :me as params.me
             toolid = parseInt(req.params.toolid);
-            if (!toolid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+            if (!toolid) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
 
             const tool = await Tool.readAll(toolid);
             return res.send(JSON.stringify(tool));
