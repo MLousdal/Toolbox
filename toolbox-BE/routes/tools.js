@@ -8,8 +8,22 @@ const Tool = require('../models/tool');
 //const Author = require('../models/author');
 
 
-// ---------------------------------------------------------
+// Middleware
+auth = require('../middleware/authenticate'),
 
+// Member +
+auth_member_plus = require('../middleware/member_plus'),
+memberPlus = [auth, auth_member_plus],
+
+// Admin
+
+
+// Error handler
+{ TakeError } = require('../helpers/helpError');
+
+// ---------------------------------------------------------
+// ----------------- TABLE OF CONTENTS ---------------------
+// ---------------------------------------------------------
 
 // GET
 // /api/accounts
@@ -50,6 +64,14 @@ router.get('/', async (req, res) => {
         return res.send(JSON.stringify(tools));
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
+    }
+});
+router.get('/', async (req, res, next) => {
+    try {
+        const user = await Tool.readAll();
+        return res.send(JSON.stringify(user));
+    } catch (err) {
+        next(err);
     }
 });
 

@@ -26,18 +26,12 @@ memberPlus = [auth, auth_member_plus],
 // Error handler
 { TakeError } = require('../helpers/helpError');
 
-
 // ---------------------------------------------------------
 // ----------------- TABLE OF CONTENTS ---------------------
 // ---------------------------------------------------------
 // POST
 // /api/Users
 // /api/Users/login
-
-// PUT
-// /api/Users/:UserId
-// /api/Users/delete/me
-// /api/Users/delete/:UserId
 
 // GET
 // /api/Users
