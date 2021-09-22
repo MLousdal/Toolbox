@@ -1,0 +1,30 @@
+{
+  "name": "toolbox",
+  "version": "1.0.0",
+  "description": "webTemplate is a template for websites that supply me with the variables, and classes I need to start a new project! 🚀",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MLousdal/toolbox.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MLousdal/toolbox/issues"
+  },
+  "homepage": "https://github.com/MLousdal/toolbox#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "config": "^3.3.6",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "joi": "^17.4.2",
+    "jsonwebtoken": "^8.5.1",
+    "mssql": "^7.2.1"
+  }
+}
