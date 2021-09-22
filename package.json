@@ -26,5 +26,9 @@
     "joi": "^17.4.2",
     "jsonwebtoken": "^8.5.1",
     "mssql": "^7.2.1"
+  },
+  "devDependencies": {
+    "@parcel/transformer-image": "^2.0.0-rc.0",
+    "@parcel/transformer-sass": "^2.0.0-rc.0"
   }
 }

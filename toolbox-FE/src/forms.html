@@ -16,41 +16,38 @@
         <img src="assets/images/logo.png" alt="logo" class="nav-logo">
     </a>
     <ul id="nav-links">
-        <li><a href="mypage.html" class="underline">my page</a></li>
         <li><a href="forms.html" class="underline">login / signup</a></li>
     </ul>
-</nav>
+  </nav>
     <main class="forms wrapper">
       <div class="btn-container">
-        <input type="radio" id="login" name="tabs" checked="checked" />
-        <label for="login" class="btn">login</label>
-        <input type="radio" id="signup" name="tabs" />
-        <label for="signup" class="btn">signup</label>
+        <button id="login" name="tabs" class="btn active">login</button>
+        <button id="signup" name="tabs" class="btn">signup</button>
       </div>
       <form class="login">
-        <label for="Lusername"
-          >username:
-          <input type="text" id="Lusername" name="login" required />
+        <label for="LuserEmail"
+          >email:
+          <input type="text" id="LuserEmail" name="email" required />
         </label>
         <label for="Lpassword"
           >password:
-          <input type="password" id="Lpassword" name="login" required />
+          <input type="password" id="Lpassword" name="password" required />
         </label>
-        <button class="btn active" id="loginSubmit">login</button>
+        <button type="submit" class="btn active" id="loginSubmit">login</button>
       </form>
       <form class="signup">
-        <label for="SUemail"
-          >email: <input type="email" id="SUemail" name="signup" required
+        <label for="SUuserName"
+          >username:<input type="text" id="SUuserName" name="username" required
         /></label>
-        <label for="SUusername"
-          >username:
-          <input type="text" id="SUusername" name="signup" required />
+        <label for="SUuserEmail"
+          >email:
+          <input type="text" id="SUuserEmail" name="signup" required />
         </label>
         <label for="SUpassword"
           >password:
-          <input type="password" id="SUpassword" name="signup" required />
+          <input type="password" id="SUpassword" name="password" required />
         </label>
-        <button class="btn active" id="signupSubmit">signup</button>
+        <button type="submit" class="btn active" id="signupSubmit">signup</button>
       </form>
     </main>
   </body>

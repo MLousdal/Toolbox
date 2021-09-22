@@ -1,0 +1,10 @@
+@use "../base/variables" as *;
+
+.scale {
+  transition: transform 0.2s linear;
+
+  &:hover, &:focus {
+    outline: 0;
+    transform: scale(1.05);
+  }
+}

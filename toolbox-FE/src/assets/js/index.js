@@ -1,14 +1,10 @@
-// Scroll arrow
-const toolbox = document.querySelector(".toolbox");
-const arrow = document.querySelector("#arrow");
-
-if (arrow) {
-  arrow.addEventListener("click", () => {
-    toolbox.scrollIntoView();
-  });
-}
+// Global variables
+const url = "http://127.0.0.1:8118/api/";
+const loginEndpoint = "users/login";
+const signupEndpoint = "users/";
 
 // toggle between categories
+const toolbox = document.querySelector(".toolbox");
 if (toolbox) {
   const design = document.querySelector("#design");
   const designSec = document.querySelector(".design");
@@ -56,30 +52,125 @@ if (toolbox) {
   });
 }
 
-// toggle between forms
+// Scroll arrow
+const arrow = document.querySelector("#arrow");
+if (arrow) {
+  arrow.addEventListener("click", () => {
+    toolbox.scrollIntoView();
+  });
+}
+
+// toggle between forms (login or signup)
 const forms = document.querySelector(".forms");
 
 if (forms) {
+  const btnContainer = document.querySelector(".btn-container");
   const loginBtn = document.querySelector("#login");
   const loginForm = document.querySelector(".login");
-
   const signupBtn = document.querySelector("#signup");
   const signupForm = document.querySelector(".signup");
-
-  const btnContainer = document.querySelector(".btn-container");
 
   btnContainer.addEventListener("click", (e) => {
     switch (e.target) {
       case loginBtn:
+        loginBtn.classList.add("active");
+        signupBtn.classList.remove("active");
         loginForm.style.display = "flex";
         signupForm.style.display = "none";
         break;
       case signupBtn:
+        loginBtn.classList.remove("active");
+        signupBtn.classList.add("active");
         signupForm.style.display = "flex";
         loginForm.style.display = "none";
         break;
     }
   });
+
+
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const LuserEmail = document.querySelector("#LuserEmail");
+    const Lpassword = document.querySelector("#Lpassword");
+    const data = {
+      userEmail: LuserEmail.value,
+      userPassword: Lpassword.value,
+    };
+
+    fetch(url + loginEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        const toolboxToken = response.headers.get("toolbox-token");
+        localStorage.setItem("toolbox-token", toolboxToken);
+        window.location.href = "http://localhost:1234/index.html";
+        return response.json();
+      })
+      .then((data) => {
+        const userData = data;
+        localStorage.setItem("userData", JSON.stringify(userData));
+        window.location.href = "http://localhost:1234/index.html";
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+
+  signupForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const SUuserName = document.querySelector("#SUuserName");
+    const SUuserEmail = document.querySelector("#SUuserEmail");
+    const SUpassword = document.querySelector("#SUpassword");
+    const data = {
+      userName: SUuserName.value,
+      userEmail: SUuserEmail.value,
+      userPassword: SUpassword.value,
+    };
+
+    fetch(url + signupEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        const toolboxToken = response.headers.get("toolbox-token");
+        localStorage.setItem("toolbox-token", toolboxToken);
+        return response.json();
+      })
+      .then((data) => {
+        const userData = data;
+        localStorage.setItem("userData", JSON.stringify(userData));
+        window.location.href = "http://localhost:1234/index.html";
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+}
+
+// check if logged in
+let token = localStorage.getItem('toolbox-token');
+
+if (token) {
+  const navLinks = document.querySelector("#nav-links");
+  
+  navLinks.innerHTML = `
+  <li><a href="mypage.html" class="underline">my page</a></li>
+  <li><button class="btn scale" id="logoutBtn">logout</button></li>
+  `;
+  
+  const logoutBtn = document.querySelector("#logoutBtn");
+  logoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "http://localhost:1234/index.html";
+  });
+
 }
 
 // tool options
@@ -168,9 +259,9 @@ if (myPageForms) {
             console.log("submitTool");
             // ready for fetch integration
             break;
-            case updateToolBtn:
-              console.log("updateTool");
-              // ready for fetch integration
+          case updateToolBtn:
+            console.log("updateTool");
+            // ready for fetch integration
             break;
           default:
             break;
