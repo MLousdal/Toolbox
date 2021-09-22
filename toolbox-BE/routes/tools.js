@@ -56,7 +56,6 @@ router.get('/', async (req, res,next) => {
     }
 });
 
-
 //  GET /api/tools/favorite/:me  (Get all tools that a user has as favorites)
 router.get('/favorite/:me', async (req, res, next) => {
     let me;

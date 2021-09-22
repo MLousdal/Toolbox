@@ -5,7 +5,6 @@ Joi = require('joi'),
  _ = require('lodash'),
 
 con = config.get('dbConfig_UCN'),
-
  
  
 // Error Handlers
