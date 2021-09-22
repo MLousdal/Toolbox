@@ -20,6 +20,7 @@ app.use(express.json());
 app.use(cors());
 app.use(setContentTypeJSON);
 app.use('/api/users', users);
+app.use('/api/tools', tools);
 
 // Check if things work, like the errorHandler / errorMiddleware
 app.get('/error', (req, res) => {
@@ -28,9 +29,5 @@ app.get('/error', (req, res) => {
 
 // After Other Middleware
 app.use(errorMiddleware);
-
-
-// books --> tools
-app.use('/api/tools', tools);
 
 app.listen(config.get('port'), () => console.log(`Listening on port ${config.get('port')}...`));

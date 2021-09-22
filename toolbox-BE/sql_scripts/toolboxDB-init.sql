@@ -103,7 +103,7 @@ GO
 CREATE TABLE toolboxCategory
 (
     categoryId INT NOT NULL IDENTITY PRIMARY KEY,
-    categoryValue NVARCHAR(50) NOT NULL
+    categoryName NVARCHAR(50) NOT NULL
 );
 GO
 
@@ -123,7 +123,7 @@ CREATE TABLE toolboxTool
 (
     toolId INT NOT NULL IDENTITY PRIMARY KEY,
     toolTitle NVARCHAR(50) NOT NULL,
-    toolContent NVARCHAR(128) NOT NULL,
+    toolDescription NVARCHAR(128) NOT NULL,
     toolLink NVARCHAR(255) NOT NULL,
     toolStatus NVARCHAR(50) NOT NULL,
 
@@ -158,7 +158,7 @@ GO
 
 -- Categories
 INSERT INTO toolboxCategory
-    ([categoryValue])
+    ([categoryName])
 VALUES
     ('Design'),
     ('UserExperience'),
@@ -176,7 +176,7 @@ GO
 
 -- Tools
 INSERT INTO toolboxTool
-    ([toolTitle], [toolContent], [toolLink], [toolStatus], [FK_userId], [FK_categoryId])
+    ([toolTitle], [toolDescription], [toolLink], [toolStatus], [FK_userId], [FK_categoryId])
 VALUES
     ('Type Scale', 'A tool to have better scales between font sizes', 'https://type-scale.com/', 'active', 1, 1),
     ('Figma', 'Figma connects everyone in the design process so teams can deliver better products, faster.', 'https://www.figma.com/', 'active', 1, 1),
