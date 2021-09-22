@@ -1,0 +1,65 @@
+@use "../base/variables" as *;
+
+.forms {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: $spacing-s;
+
+  input[type="radio"] {
+    display: none;
+  }
+}
+
+input[type="radio"]:checked + label {
+  background-color: var(--color-primary);
+}
+
+.login {
+  display: flex;
+}
+
+form {
+  display: none;
+  flex-direction: column;
+  gap: $spacing-s;
+  order: 1;
+  background-color: var(--foreground-color);
+  padding: $spacing-s;
+  border-radius: $border-radius;
+  width: 100%;
+  max-width: 30rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  textarea,
+  select {
+    background-color: var(--foreground-color);
+    padding: $spacing-xs;
+    border: 1px solid var(--color-primary);
+    border-radius: $border-radius;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  hr {
+    width: 100%;
+    border-top: 1px solid var(--color-primary);
+  }
+
+  .btn {
+    width: fit-content;
+    align-self: center;
+  }
+}

@@ -114,7 +114,6 @@ router.post('/', async (req, res) => {
 
 // DELETE NOT USED IN PROJECT
 
-
 /*   router.delete('/:toolid', async (req, res) => {
         // › › validate req.params.toolid as toolid
         // › › call await Tool.delete(req.params.toolid)
@@ -182,9 +181,6 @@ router.put('/:toolid', async (req, res) => {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
     }
 });
-
-
-
 
 //------------------------PUT(SOFT-DELETE)-------------------------------
 

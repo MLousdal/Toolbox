@@ -1,0 +1,46 @@
+@use "../base/variables" as *;
+
+nav {
+    position: static;
+    top: 0;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    z-index: 5;
+    background-color: var(--foreground-color);
+
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    li {
+        display: inline-flex;
+        justify-content: space-evenly;
+        padding: $spacing-s;
+    }
+
+    a {
+        font-weight: 400;
+        text-decoration: none;
+        color: inherit;
+        border-radius: var(--border-radius);
+    }
+    
+    .active {
+        font-weight: 700;
+    }
+    
+    .nav-logo {
+        vertical-align: bottom;
+        width: $spacing-m;
+        height: $spacing-m;
+        margin: $spacing-s $spacing-s;
+    }
+
+    .nav-logo:hover, .nav-logo:focus {
+        filter: var(--filter);
+    }
+
+}

@@ -6,16 +6,29 @@ const app = express();
 
 const cors = require('cors');
 
-// custom middleware
+// Custom middleware
 const setContentTypeJSON = require('./middleware/setResponseHeader');
+const errorMiddleware = require('./middleware/error');
 
-const accounts = require('./routes/accounts');
+const users = require('./routes/users');
 const tools = require('./routes/tools');
+
+// Error handler
+const { TakeError } = require('./helpers/helpError');
 
 app.use(express.json());
 app.use(cors());
 app.use(setContentTypeJSON);
-app.use('/api/tools', tools);
+app.use('/api/users', users);
+
+// Check if things work, like the errorHandler / errorMiddleware
+app.get('/error', (req, res) => {
+    throw new TakeError(500, 'Checking to see if errorHandler works!');
+})
+
+// After Other Middleware
+app.use(errorMiddleware);
+
 
 // books --> tools
 app.use('/api/tools', tools);

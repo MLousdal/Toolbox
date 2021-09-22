@@ -1,8 +1,7 @@
 @use "../base/variables" as *;
 
 .arrow {
-    position: absolute;
-    bottom:  $spacing-m;
+    position: relative;
     width:  $spacing-m;
     height:  $spacing-m;
     animation-name: arrow;
@@ -10,6 +9,7 @@
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
     cursor: pointer;
+    display: none;
 
     &::before {
         content: "";
@@ -27,3 +27,9 @@
     50% {transform: translateY(1rem);}
     100% {transform:translateY(0rem);}
 }
+
+@media (max-width: 650px) {
+    .arrow {
+      display: block;
+    }
+  }
