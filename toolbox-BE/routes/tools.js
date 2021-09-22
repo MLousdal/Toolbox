@@ -22,7 +22,7 @@ memberPlus = [auth, auth_member_plus],
 // ---------------------------------------------------------
 
 // GET
-// /api/accounts
+// /api/tools
 // /api/tools/me
 // /api/tools/:toolID
 

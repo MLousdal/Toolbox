@@ -89,6 +89,9 @@ if (forms) {
 
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    controller = new AbortController();
+    signal = controller.signal;
+
     const LuserEmail = document.querySelector("#LuserEmail");
     const Lpassword = document.querySelector("#Lpassword");
     const data = {
@@ -96,17 +99,25 @@ if (forms) {
       userPassword: Lpassword.value,
     };
 
+    const Loutput = document.querySelector("#Loutput");
+
     fetch(url + loginEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      signal: controller.signal,
     })
       .then((response) => {
+        if (response.status !== 200) {
+          Loutput.innerHTML = `
+          <span>ERROR: email or password is incorrect</span>
+          `;
+          controller.abort();
+        }
         const toolboxToken = response.headers.get("toolbox-token");
         localStorage.setItem("toolbox-token", toolboxToken);
-        window.location.href = "http://localhost:1234/index.html";
         return response.json();
       })
       .then((data) => {
@@ -121,6 +132,9 @@ if (forms) {
 
   signupForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    controller = new AbortController();
+    signal = controller.signal;
+
     const SUuserName = document.querySelector("#SUuserName");
     const SUuserEmail = document.querySelector("#SUuserEmail");
     const SUpassword = document.querySelector("#SUpassword");
@@ -130,22 +144,29 @@ if (forms) {
       userPassword: SUpassword.value,
     };
 
+    const SUoutput = document.querySelector("#SUoutput");
     fetch(url + signupEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      signal: controller.signal,
     })
       .then((response) => {
-        const toolboxToken = response.headers.get("toolbox-token");
-        localStorage.setItem("toolbox-token", toolboxToken);
+        if (response.status !== 200) {
+          SUoutput.innerHTML = `
+        <span>ERROR: Account not created</span>
+        `;
+          controller.abort();
+        }
         return response.json();
       })
       .then((data) => {
+        console.log("data");
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
-        window.location.href = "http://localhost:1234/index.html";
+        // window.location.href = "http://localhost:1234/forms.html";
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -239,31 +260,30 @@ if (myPageMain) {
   `;
   myPageMain.innerHTML += myTools;
   myPageMain.innerHTML += myPageSubmit;
-}
 
-// tool options
-const allToolOptions = document.querySelectorAll(".toolOptions");
+  // tool options
+  const allToolOptions = document.querySelectorAll(".toolOptions");
 
-if (allToolOptions) {
-  allToolOptions.forEach((tool) => {
-    const options = tool.children[1];
-    const optionsBtn = tool.children[2];
-    const updateBtn = options.children[0];
-    const deleteBtn = options.children[1];
+  if (allToolOptions) {
+    allToolOptions.forEach((tool) => {
+      const options = tool.children[1];
+      const optionsBtn = tool.children[2];
+      const updateBtn = options.children[0];
+      const deleteBtn = options.children[1];
 
-    const myPageForms = document.querySelector(".myPageForms");
+      const myPageForms = document.querySelector(".myPageForms");
 
-    tool.addEventListener("click", (e) => {
-      const title = tool.children[0].children[0].innerHTML;
-      const desc = tool.children[0].children[1].innerHTML;
-      const link = tool.children[0].children[2].href;
+      tool.addEventListener("click", (e) => {
+        const title = tool.children[0].children[0].innerHTML;
+        const desc = tool.children[0].children[1].innerHTML;
+        const link = tool.children[0].children[2].href;
 
-      switch (e.target) {
-        case optionsBtn:
-          options.classList.toggle("flex");
-          break;
-        case updateBtn:
-          myPageForms.innerHTML += `
+        switch (e.target) {
+          case optionsBtn:
+            options.classList.toggle("flex");
+            break;
+          case updateBtn:
+            myPageForms.innerHTML += `
           <form id="updateTool">
             <h3>Update: ${title}</h3>
             <label for="Utitel">title: 
@@ -287,49 +307,18 @@ if (allToolOptions) {
             <button class="btn active" id="UoldTool">submit</button>
           </form>
           `;
-          options.classList.toggle("flex");
-          updateAllmyPageForms();
-          break;
-        case deleteBtn:
-          if (confirm("Are you sure?")) {
-            console.log("send for delete");
-            tool.style.display = "none";
-          } else {
-            console.log("not sure");
-          }
-          options.classList.toggle("flex");
-          updateAllmyPageForms();
-          break;
-        default:
-          break;
-      }
-    });
-  });
-}
-
-// AllmyPageForms
-const myPageForms = document.querySelector(".myPageForms");
-
-if (myPageForms) {
-  let AllmyPageForms = [];
-
-  function updateAllmyPageForms() {
-    let AllmyPageForms = document.querySelectorAll(".myPageForms form");
-
-    AllmyPageForms.forEach((form) => {
-      const submitTool = document.querySelector("#submitTool");
-      const updateTool = document.querySelector("#updateTool");
-
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        switch (e.target) {
-          case submitTool:
-            console.log("submitTool");
-            // ready for fetch integration
+            options.classList.toggle("flex");
+            updateAllmyPageForms();
             break;
-          case updateTool:
-            console.log("updateTool");
-            // ready for fetch integration
+          case deleteBtn:
+            if (confirm("Are you sure?")) {
+              console.log("send for delete");
+              tool.style.display = "none";
+            } else {
+              console.log("not sure");
+            }
+            options.classList.toggle("flex");
+            updateAllmyPageForms();
             break;
           default:
             break;
@@ -338,5 +327,37 @@ if (myPageForms) {
     });
   }
 
-  updateAllmyPageForms();
+  // AllmyPageForms
+  const myPageForms = document.querySelector(".myPageForms");
+
+  if (myPageForms) {
+    let AllmyPageForms = [];
+
+    function updateAllmyPageForms() {
+      let AllmyPageForms = document.querySelectorAll(".myPageForms form");
+
+      AllmyPageForms.forEach((form) => {
+        const submitTool = document.querySelector("#submitTool");
+        const updateTool = document.querySelector("#updateTool");
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          switch (e.target) {
+            case submitTool:
+              console.log("submitTool");
+              // ready for fetch integration
+              break;
+            case updateTool:
+              console.log("updateTool");
+              // ready for fetch integration
+              break;
+            default:
+              break;
+          }
+        });
+      });
+    }
+
+    updateAllmyPageForms();
+  }
 }

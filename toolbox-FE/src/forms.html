@@ -28,13 +28,14 @@
       <form class="login">
         <label for="LuserEmail"
           >email:
-          <input type="text" id="LuserEmail" name="email" required />
+          <input type="email" id="LuserEmail" name="email" required />
         </label>
         <label for="Lpassword"
           >password:
           <input type="password" id="Lpassword" name="password" required />
         </label>
         <button type="submit" class="btn active" id="loginSubmit">login</button>
+        <div id="Loutput" class="flex align-center"></div>
       </form>
       <form class="signup">
         <label for="SUuserName"
@@ -42,13 +43,14 @@
         /></label>
         <label for="SUuserEmail"
           >email:
-          <input type="text" id="SUuserEmail" name="signup" required />
+          <input type="email" id="SUuserEmail" name="signup" required />
         </label>
         <label for="SUpassword"
           >password:
           <input type="password" id="SUpassword" name="password" required />
         </label>
         <button type="submit" class="btn active" id="signupSubmit">signup</button>
+        <div id="SUoutput" class="flex align-center"></div>
       </form>
     </main>
   </body>
