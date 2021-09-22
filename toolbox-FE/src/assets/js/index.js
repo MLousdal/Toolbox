@@ -60,7 +60,7 @@ if (arrow) {
   });
 }
 
-// toggle between forms (login or signup)
+// login & signup forms
 const forms = document.querySelector(".forms");
 
 if (forms) {
@@ -86,7 +86,6 @@ if (forms) {
         break;
     }
   });
-
 
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -155,22 +154,91 @@ if (forms) {
 }
 
 // check if logged in
-let token = localStorage.getItem('toolbox-token');
+let token = localStorage.getItem("toolbox-token");
 
-if (token) {
+if (token && token !== null) {
   const navLinks = document.querySelector("#nav-links");
-  
+
   navLinks.innerHTML = `
   <li><a href="mypage.html" class="underline">my page</a></li>
   <li><button class="btn scale" id="logoutBtn">logout</button></li>
   `;
-  
+
   const logoutBtn = document.querySelector("#logoutBtn");
   logoutBtn.addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "http://localhost:1234/index.html";
   });
+}
 
+// myPage dashboard
+const myPageMain = document.querySelector("#myPage");
+
+if (myPageMain) {
+  const JSONuserName = localStorage.getItem("userData");
+  const userName = JSON.parse(JSONuserName).userName;
+
+  const myTools = `
+      <section class="box" id="myTools">
+        <h2>${userName}'s page</h2>
+        <section>
+          <h3>Submitted tools:</h3>
+          <div class="tools">
+            <div class="toolOptions">
+              <article class="tool">
+                <h4>SASS</h4>
+                <p>CSS with superpowers!</p>
+                <a href="https://sass-lang.com/">visit tool..</a>
+              </article>
+            <div class="options">
+            <button class="update btn">update</button>
+            <button class="delete btn">delete</button>
+          </div>
+          <button class="optionsBtn">&#10247;</button>
+          </div>
+          <div class="toolOptions">
+            <article class="tool">
+              <h4>Figma</h4>
+              <p>Figma connects everyone in the design process so teams can deliver better products, faster.</p>
+              <a href="https://www.figma.com/">visit tool..</a>
+            </article>
+            <div class="options">
+              <button class="update btn">update</button>
+              <button class="delete btn">delete</button>
+            </div>
+            <button class="optionsBtn">&#10247;</button>
+          </div>
+          </div>
+        </section>
+  `;
+  const myPageSubmit = `
+  <section class="myPageForms">
+  <form id="submitTool">
+    <h3>Submit a new tool:</h3>
+    <label for="Stitel">title: 
+      <input type="text" id="Stitel" name="Stitel" required>
+    </label>
+    <label for="Sdesc">description:
+      <textarea id="Sdesc" name="Sdesc" rows="3" required></textarea>
+    </label>
+    <label for="Slink">link: 
+      <input type="text" id="Slink" name="Slink" required>
+    </label>
+    <label for="Scategory">category: 
+      <select name="Scategory" id="Scategory" required>
+        <option value="">--Please choose a category --</option>
+        <option value="design">Design</option>
+        <option value="UX">UX</option>
+        <option value="frontend">frontend</option>
+        <option value="backend">backend</option>
+    </select>
+    </label>
+    <button class="btn active" id="SnewTool">submit</button>
+  </form>
+</section>
+  `;
+  myPageMain.innerHTML += myTools;
+  myPageMain.innerHTML += myPageSubmit;
 }
 
 // tool options
@@ -185,11 +253,11 @@ if (allToolOptions) {
 
     const myPageForms = document.querySelector(".myPageForms");
 
-    const title = tool.children[0].children[0].innerHTML;
-    const desc = tool.children[0].children[1].innerHTML;
-    const link = tool.children[0].children[2].href;
-
     tool.addEventListener("click", (e) => {
+      const title = tool.children[0].children[0].innerHTML;
+      const desc = tool.children[0].children[1].innerHTML;
+      const link = tool.children[0].children[2].href;
+
       switch (e.target) {
         case optionsBtn:
           options.classList.toggle("flex");
@@ -247,19 +315,19 @@ if (myPageForms) {
 
   function updateAllmyPageForms() {
     let AllmyPageForms = document.querySelectorAll(".myPageForms form");
-    console.log(AllmyPageForms);
 
     AllmyPageForms.forEach((form) => {
-      const submitToolBtn = document.querySelector("#SnewTool");
-      const updateToolBtn = document.querySelector("#UoldTool");
+      const submitTool = document.querySelector("#submitTool");
+      const updateTool = document.querySelector("#updateTool");
 
-      form.addEventListener("click", (e) => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
         switch (e.target) {
-          case submitToolBtn:
+          case submitTool:
             console.log("submitTool");
             // ready for fetch integration
             break;
-          case updateToolBtn:
+          case updateTool:
             console.log("updateTool");
             // ready for fetch integration
             break;

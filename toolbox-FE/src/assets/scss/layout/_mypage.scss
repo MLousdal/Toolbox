@@ -1,6 +1,6 @@
 @use "../base/variables" as *;
 
-.myPage {
+#myPage {
   min-height: calc(100vh - 65px);
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -10,7 +10,7 @@
   margin: $spacing-m auto;
 
   #myTools {
-    grid-column: 1;
+    // grid-column: 1;
     padding: $spacing-m;
     
     .tools {
@@ -71,9 +71,9 @@
 }
 
 @media (max-width: 1000px) {
-  .myPage {
+  #myPage {
     grid-template-columns: 1fr;
-    .myPageForms {
+    #myPageForms {
       grid-column: 1;
       flex-direction: row;
       flex-wrap: wrap;
@@ -82,9 +82,9 @@
 }
 
 @media (max-width: 745px) {
-  .myPage {
+  #myPage {
     grid-template-columns: 1fr;
-    .myPageForms {
+    #myPageForms {
       grid-column: 1;
       flex-direction: column;
     }
