@@ -1,11 +1,11 @@
 const
 config = require('config'),
-
 sql = require('mssql'),
-con = config.get('dbConfig_UCN'),
-
 Joi = require('joi'),
  _ = require('lodash'),
+
+con = config.get('dbConfig_UCN'),
+
  
  
 // Error Handlers
@@ -19,14 +19,6 @@ class Tool {
         this.toolDescription = toolObj.toolDescription;
         this.categoryId = toolObj.categoryId;
         this.categoryName = toolObj.categoryName;
-    }
-
-    copy(toolObj) {
-        // if (toolObj.toolid) this.toolid = toolObj.toolid;
-        if (toolObj.title) this.title = toolObj.title;
-        if (toolObj.year) this.year = toolObj.year;
-        if (toolObj.link) this.link = toolObj.link;
-        if (toolObj.authors) this.authors = _.cloneDeep(toolObj.authors);
     }
 
     static validate(toolWannabeeObj) {
@@ -95,6 +87,70 @@ class Tool {
                                 ORDER BY c.categoryId ASC
                             `);
                     }
+                    console.log(result)
+
+                    // Create array with tools(s) where every tool will be validated before being pushed to tools[].
+                    const tools = [];
+                    result.recordset.forEach((record, index) => {
+                        // Index could be used for things like:
+                        // -- How many tools were found and give it to the FE...
+
+                        const createTool = {
+                            toolId: record.toolId,
+                            toolTitle: record.toolTitle,
+                            toolDescription: record.toolDescription,
+                            toolLink: record.toolLink,
+                            category: {
+                                categoryId: record.categoryId,
+                                categoryName: record.categoryName
+                            }
+                        }
+
+                        // Validate if newUser are in the right format and right info.
+                        const $validate = Tool.validate(createTool);
+                        if ($validate.error) throw new TakeError(500, 'Tool validation, failed! ErrorInfo' + $validate.error);
+
+                        tools.push(createTool);
+                    });
+
+                    // If tools are empty, then throw error because that means the tools could not be found.
+                    if (tools.length == 0) throw new TakeError(400, 'Bad Request: Tools not found!');
+
+                    resolve(tools);
+                } catch (err) {
+                    reject(err);
+                }
+                sql.close();
+            })();
+        });
+    }
+
+    static readAll_favorite (userId) {
+        return new Promise((resolve, reject) => {
+            (async () => {
+                // -- connect to DB
+                // -- create SQL query string that find the matches to the userId in the toolboxFavorite-tabel.
+                    // -- Make sure that all the tools have the status = 'active' (So the tool haven't been soft-deleted)
+                // -- query DB with query string
+                // -- restructure DB result into the object structure needed
+                // -- validate objects
+                // -- close DB connection
+                try {
+                    const pool = await sql.connect(con);
+
+                    const result = await pool.request()
+                    .input('userId', sql.Int(), userId)
+                    .query(`                 
+                        SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                        FROM toolboxUser u
+                        JOIN toolboxFavorite f
+                            ON f.FK_userId = @userId
+                        JOIN toolboxTool t
+                            ON f.FK_toolId = t.toolId
+                        JOIN toolboxCategory c
+                            ON t.FK_categoryId = c.categoryId
+                        WHERE u.userId = @userId AND t.toolStatus = 'active'
+                    `);
                     console.log(result)
 
                     // Create array with tools(s) where every tool will be validated before being pushed to tools[].

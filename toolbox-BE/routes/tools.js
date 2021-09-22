@@ -22,20 +22,21 @@ memberPlus = [auth, auth_member_plus],
 // ---------------------------------------------------------
 
 // GET
-// /api/accounts
-// /api/tools/me
-// /api/tools/:toolID
+// /api/tools -- All tools
+// /api/tools/:toolID -- Specific tool
+// /api/tools/favorite/:me -- All favoritet tools from a specific user
 
 
 // POST
-// /api/tools
+// /api/tools -- Create new Tool
+// /api/tools/favorite/:userId -- Add tool to users favorite list
 
 
 // PUT
 // /api/tools/me/:toolID
 // /api/tools/:toolID
 // PUT - (SOFT DELETE)
-// /api/tools/delete/me
+// /api/tools/delete/:me/:toolId
 // /api/tools/delete/:toolID
 
 
@@ -56,10 +57,17 @@ router.get('/', async (req, res,next) => {
 });
 
 
-//  GET /api/tools/favorit/:me -- Get all tools that a user has as favorits
-router.get('/', async (req, res, next) => {
+//  GET /api/tools/favorite/:me  (Get all tools that a user has as favorites)
+router.get('/favorite/:me', async (req, res, next) => {
+    let me;
     try {
-        const user = await Tool.readAll();
+        if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+            me = parseInt(req.params.me);
+        }
+        
+        if (!me) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+
+        const user = await Tool.readAll_favorite(me);
         return res.send(JSON.stringify(user));
     } catch (err) {
         next(err);
@@ -74,11 +82,12 @@ router.get('/:toolid', async (req, res, next) => {
     try {
         if (req.params.toolid) { // Params stores the values from URL segmets like :me as params.me
             toolid = parseInt(req.params.toolid);
-            if (!toolid) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        }
+
+        if (!toolid) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
 
             const tool = await Tool.readAll(toolid);
             return res.send(JSON.stringify(tool));
-        }
     } catch (err) {
         next(err);
     }
