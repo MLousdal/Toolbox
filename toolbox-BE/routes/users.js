@@ -26,18 +26,12 @@ memberPlus = [auth, auth_member_plus],
 // Error handler
 { TakeError } = require('../helpers/helpError');
 
-
 // ---------------------------------------------------------
 // ----------------- TABLE OF CONTENTS ---------------------
 // ---------------------------------------------------------
 // POST
 // /api/Users
 // /api/Users/login
-
-// PUT
-// /api/Users/:UserId
-// /api/Users/delete/me
-// /api/Users/delete/:UserId
 
 // GET
 // /api/Users
@@ -107,100 +101,6 @@ router.post('/login', memberPlus, async (req, res, next) => {
     }
 });
 
-//------------------------ PUT -------------------------------
-
-// ----- (MEMBER) UPDATE own User
-router.put('/me', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = User.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = User.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await User.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
-// ----- (ADMIN) UPDATE User
-router.put('/:userid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = User.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = User.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await User.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
-// ----- (MEMBER) "DELETE" own User
-router.put('/delete/me', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = User.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = User.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await User.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
-// ----- (ADMIN) "DELETE" any User
-router.put('/delete/:userid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = User.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = User.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await User.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
 //------------------------ GET -------------------------------
 
 // ----- (ADMIN) GET ALL Users
@@ -239,10 +139,9 @@ router.get('/:userid', async (req, res, next) => {
             if (!userid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
             const user = await User.readAll(userid);
-        return res.send(JSON.stringify(user));
+            return res.send(JSON.stringify(user));
         }
     } catch (err) {
-        console.log("THIS ERROR",err)
         next(err);
     }
 });
