@@ -3,6 +3,42 @@ const url = "http://127.0.0.1:8118/api/";
 const loginEndpoint = "users/login";
 const signupEndpoint = "users/";
 const toolsEndpoint = "tools/";
+const favoritEndpoint = "favorite/";
+
+// check if logged in
+let token = localStorage.getItem("toolbox-token");
+
+if (token && token !== null) {
+  const navLinks = document.querySelector("#nav-links");
+
+  navLinks.innerHTML = `
+  <li><a href="mypage.html" class="underline">my page</a></li>
+  <li><button class="btn scale" id="logoutBtn">logout</button></li>
+  `;
+
+  const logoutBtn = document.querySelector("#logoutBtn");
+  logoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "http://localhost:1234/index.html";
+  });
+
+  const hero = document.querySelector(".hero");
+
+  if (hero) {
+    hero.style.padding = "0";
+    hero.classList.add("center-flex");
+    hero.children[2].classList.add("hide");
+  }
+}
+
+// -- Landing page --
+// Scroll arrow
+const arrow = document.querySelector("#arrow");
+if (arrow) {
+  arrow.addEventListener("click", () => {
+    toolbox.scrollIntoView();
+  });
+}
 
 // toggle between categories
 const toolbox = document.querySelector(".toolbox");
@@ -53,6 +89,15 @@ if (toolbox) {
   });
 }
 
+// Remove skeletons
+function removeSkeletons() {
+  const skeletons = document.querySelectorAll(".skeleton");
+
+  skeletons.forEach((skeleton) => {
+    skeleton.remove();
+  });
+}
+
 // Load all tools
 if (toolbox) {
   const designTab = document.querySelector(".design");
@@ -60,18 +105,15 @@ if (toolbox) {
   const frontendTab = document.querySelector(".frontend");
   const backendTab = document.querySelector(".backend");
 
-  const skeletons = document.querySelectorAll(".skeleton");
-
   fetch(url + toolsEndpoint, {
-    method: "GET"
+    method: "GET",
   })
-    .then((response) => { return response.json(); })
+    .then((response) => {
+      return response.json();
+    })
     .then((data) => {
-      skeletons.forEach(skeleton => {
-        skeleton.remove()
-      });
-
-      data.forEach(tool => {
+      removeSkeletons();
+      data.forEach((tool) => {
         switch (tool.category.categoryId) {
           case 1:
             designTab.innerHTML += `
@@ -119,15 +161,7 @@ if (toolbox) {
     });
 }
 
-// Scroll arrow
-const arrow = document.querySelector("#arrow");
-if (arrow) {
-  arrow.addEventListener("click", () => {
-    toolbox.scrollIntoView();
-  });
-}
-
-// login & signup forms
+// -- login & signup --
 const forms = document.querySelector(".forms");
 
 if (forms) {
@@ -240,33 +274,7 @@ if (forms) {
   });
 }
 
-// check if logged in
-let token = localStorage.getItem("toolbox-token");
-
-if (token && token !== null) {
-  const navLinks = document.querySelector("#nav-links");
-
-  navLinks.innerHTML = `
-  <li><a href="mypage.html" class="underline">my page</a></li>
-  <li><button class="btn scale" id="logoutBtn">logout</button></li>
-  `;
-
-  const logoutBtn = document.querySelector("#logoutBtn");
-  logoutBtn.addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "http://localhost:1234/index.html";
-  });
-
-  const hero = document.querySelector(".hero");
-
-  if (hero) {
-    hero.style.padding = "0";
-    hero.classList.add("center-flex");
-    hero.children[2].classList.add("hide");
-  }
-}
-
-// myPage dashboard
+// -- myPage dashboard --
 const myPageMain = document.querySelector("#myPage");
 
 if (myPageMain) {
@@ -277,31 +285,10 @@ if (myPageMain) {
       <section class="box" id="myTools">
         <h2>${userName}'s page</h2>
         <section>
-          <h3>Submitted tools:</h3>
+          <h3>Favorite tools:</h3>
           <div class="tools">
-            <div class="toolOptions">
-              <article class="tool">
-                <h4>SASS</h4>
-                <p>CSS with superpowers!</p>
-                <a href="https://sass-lang.com/">visit tool..</a>
-              </article>
-            <div class="options">
-            <button class="update btn">update</button>
-            <button class="delete btn">delete</button>
-          </div>
-          <button class="optionsBtn">&#10247;</button>
-          </div>
-          <div class="toolOptions">
-            <article class="tool">
-              <h4>Figma</h4>
-              <p>Figma connects everyone in the design process so teams can deliver better products, faster.</p>
-              <a href="https://www.figma.com/">visit tool..</a>
-            </article>
-            <div class="options">
-              <button class="update btn">update</button>
-              <button class="delete btn">delete</button>
-            </div>
-            <button class="optionsBtn">&#10247;</button>
+          <div class="skeleton">
+            <article class="tool"></article>
           </div>
           </div>
         </section>
@@ -335,11 +322,16 @@ if (myPageMain) {
   myPageMain.innerHTML += myTools;
   myPageMain.innerHTML += myPageSubmit;
 
-  // tool options
-  const allToolOptions = document.querySelectorAll(".toolOptions");
+  const myPageTools = document.querySelector(".tools");
+  const userData = localStorage.getItem("userData");
+  const userId = JSON.parse(userData).userId;
 
-  if (allToolOptions) {
-    allToolOptions.forEach((tool) => {
+  // tool options
+  let toolOptionsArr = [];
+
+  function updateallToolOptions() {
+    let toolOptionsArr = document.querySelectorAll(".toolOptions");
+    toolOptionsArr.forEach((tool) => {
       const options = tool.children[1];
       const optionsBtn = tool.children[2];
       const updateBtn = options.children[0];
@@ -401,37 +393,66 @@ if (myPageMain) {
     });
   }
 
-  // AllmyPageForms
-  const myPageForms = document.querySelector(".myPageForms");
-
-  if (myPageForms) {
-    let AllmyPageForms = [];
-
-    function updateAllmyPageForms() {
-      let AllmyPageForms = document.querySelectorAll(".myPageForms form");
-
-      AllmyPageForms.forEach((form) => {
-        const submitTool = document.querySelector("#submitTool");
-        const updateTool = document.querySelector("#updateTool");
-
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          switch (e.target) {
-            case submitTool:
-              console.log("submitTool");
-              // ready for fetch integration
-              break;
-            case updateTool:
-              console.log("updateTool");
-              // ready for fetch integration
-              break;
-            default:
-              break;
-          }
-        });
+  fetch(url + toolsEndpoint + favoritEndpoint + userId, {
+    method: "GET",
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      removeSkeletons();
+      data.forEach((tool) => {
+        myPageTools.innerHTML += `
+        <div class="toolOptions">
+        <article class="tool">
+          <h4>${tool.toolTitle}</h4>
+          <p>${tool.toolDescription}</p>
+          <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+        </article>
+        <div class="options">
+          <button class="update btn">update</button>
+          <button class="delete btn">delete</button>
+        </div>
+        <button class="optionsBtn">&#10247;</button>
+      </div>
+        `;
       });
-    }
+      updateallToolOptions();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      myPageTools.innerHTML = `
+      <span class="flex center-flex">You don't have any favorite tools</span>
+      `
+    });
 
-    updateAllmyPageForms();
+  // AllmyPageForms
+  let AllmyPageForms = [];
+
+  function updateAllmyPageForms() {
+    let AllmyPageForms = document.querySelectorAll(".myPageForms form");
+
+    AllmyPageForms.forEach((form) => {
+      const submitTool = document.querySelector("#submitTool");
+      const updateTool = document.querySelector("#updateTool");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        switch (e.target) {
+          case submitTool:
+            console.log("submitTool");
+            // ready for fetch integration
+            break;
+          case updateTool:
+            console.log("updateTool");
+            // ready for fetch integration
+            break;
+          default:
+            break;
+        }
+      });
+    });
   }
+
+  updateAllmyPageForms();
 }
