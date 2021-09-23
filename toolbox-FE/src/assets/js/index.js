@@ -123,16 +123,16 @@ if (toolbox) {
         `;
         switch (tool.category.categoryId) {
           case 1:
-            designTab.innerHTML += toolHTML
+            designTab.innerHTML += toolHTML;
             break;
           case 2:
-            uxTab.innerHTML += toolHTML
+            uxTab.innerHTML += toolHTML;
             break;
           case 3:
-            frontendTab.innerHTML += toolHTML
+            frontendTab.innerHTML += toolHTML;
             break;
           case 4:
-            backendTab.innerHTML += toolHTML
+            backendTab.innerHTML += toolHTML;
             break;
           default:
             break;
@@ -261,14 +261,29 @@ if (forms) {
 const myPageMain = document.querySelector("#myPage");
 
 if (myPageMain) {
-  const JSONuserName = localStorage.getItem("userData");
-  const userName = JSON.parse(JSONuserName).userName;
+  const userData = localStorage.getItem("userData");
+  const userName = JSON.parse(userData).userName;
+  const userId = JSON.parse(userData).userId;
+  const userRole = JSON.parse(userData)["userRole"].roleId;
 
-  const myTools = `
+  let myTools = `
+  <section class="box" id="myTools">
+    <h2>${userName}'s page</h2>
+    <section>
+      <h3>Favorite tools:</h3>
+      <div class="tools">
+      <div class="skeleton">
+        <article class="tool"></article>
+      </div>
+      </div>
+    </section>
+`;
+  if (userRole == 1) {
+    myTools = `
       <section class="box" id="myTools">
         <h2>${userName}'s page</h2>
         <section>
-          <h3>Favorite tools:</h3>
+          <h3>All tools:</h3>
           <div class="tools">
           <div class="skeleton">
             <article class="tool"></article>
@@ -276,6 +291,8 @@ if (myPageMain) {
           </div>
         </section>
   `;
+  }
+
   const myPageSubmit = `
   <section class="myPageForms">
   <form id="submitTool">
@@ -292,10 +309,10 @@ if (myPageMain) {
     <label for="Scategory">category: 
       <select name="Scategory" id="Scategory" required>
         <option value="">--Please choose a category --</option>
-        <option value="design">Design</option>
-        <option value="UX">UX</option>
-        <option value="frontend">frontend</option>
-        <option value="backend">backend</option>
+        <option value="1">Design</option>
+        <option value="2">UX</option>
+        <option value="3">frontend</option>
+        <option value="4">backend</option>
     </select>
     </label>
     <button class="btn active" id="SnewTool">submit</button>
@@ -306,8 +323,6 @@ if (myPageMain) {
   myPageMain.innerHTML += myPageSubmit;
 
   const myPageTools = document.querySelector(".tools");
-  const userData = localStorage.getItem("userData");
-  const userId = JSON.parse(userData).userId;
 
   // tool options
   let toolOptionsArr = [];
@@ -326,36 +341,36 @@ if (myPageMain) {
         const title = tool.children[0].children[0].innerHTML;
         const desc = tool.children[0].children[1].innerHTML;
         const link = tool.children[0].children[2].href;
-        
+
         switch (e.target) {
           case optionsBtn:
             options.classList.toggle("flex");
             break;
           case updateBtn:
             myPageForms.innerHTML += `
-          <form id="updateTool">
-            <h3>Update: ${title}</h3>
-            <label for="Utitel">title: 
+              <form id="updateTool">
+              <h3>Update: ${title}</h3>
+              <label for="Utitel">title: 
               <input type="text" id="Utitel" name="updateTool" required value="${title}">
-            </label>
-            <label for="Udesc">description:
+              </label>
+              <label for="Udesc">description:
               <textarea id="Udesc" name="updateTool" rows="3" required>${desc}</textarea>
-            </label>
-            <label for="Ulink">link: 
+              </label>
+              <label for="Ulink">link: 
               <input type="text" id="Ulink" name="updateTool" required value="${link}">
-            </label>
-            <label for="Ucategory">category: 
+              </label>
+              <label for="Ucategory">category: 
               <select name="updateTool" id="Ucategory" required>
-                <option value="">--Please choose a category --</option>
-                <option value="design">Design</option>
-                <option value="UX">UX</option>
-                <option value="frontend">frontend</option>
-                <option value="backend">backend</option>
-            </select>
-            </label>
-            <button class="btn active" id="UoldTool">submit</button>
-          </form>
-          `;
+              <option value="">--Please choose a category --</option>
+              <option value="design">Design</option>
+              <option value="UX">UX</option>
+              <option value="frontend">frontend</option>
+              <option value="backend">backend</option>
+              </select>
+              </label>
+              <button class="btn active" id="UoldTool">submit</button>
+              </form>
+              `;
             options.classList.toggle("flex");
             updateAllmyPageForms();
             break;
@@ -376,41 +391,76 @@ if (myPageMain) {
     });
   }
 
-  fetch(url + toolsEndpoint + favoritEndpoint + userId, {
-    method: "GET",
-  })
-    .then((response) => {
-      return response.json();
+  //  if admin
+  if (userRole == 1) {
+    fetch(url + toolsEndpoint, {
+      method: "GET",
     })
-    .then((data) => {
-      removeSkeletons();
-      data.forEach((tool) => {
-        const toolHTML = `
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        removeSkeletons();
+        data.forEach((tool) => {
+          const toolHTML = `
+          <article class="tool">
+              <h4>${tool.toolTitle}</h4>
+              <p>${tool.toolDescription}</p>
+              <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+          </article>
+          `;
+          myPageTools.innerHTML += `
+          <div class="toolOptions">
+          ${toolHTML}
+          <div class="options">
+            <button class="update btn">update</button>
+            <button class="delete btn">delete</button>
+          </div>
+          <button class="optionsBtn">&#10247;</button>
+          </div>
+          `;
+        });
+        updateallToolOptions();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        myPageTools.innerHTML = `
+        <span class="flex center-flex">You don't have any favorite tools</span>
+        `;
+      });
+  }
+
+  // if member
+  if (userRole == 2) {
+    console.log("member");
+    fetch(url + toolsEndpoint + favoritEndpoint + userId, {
+      method: "GET",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        removeSkeletons();
+        data.forEach((tool) => {
+          const toolHTML = `
         <article class="tool">
             <h4>${tool.toolTitle}</h4>
             <p>${tool.toolDescription}</p>
             <a href="${tool.toolLink}" target="_blank">visit tool..</a>
         </article>
         `;
-        myPageTools.innerHTML += `
-        <div class="toolOptions">
-        ${toolHTML}
-        <div class="options">
-          <button class="update btn">update</button>
-          <button class="delete btn">delete</button>
-        </div>
-        <button class="optionsBtn">&#10247;</button>
-      </div>
-        `;
-      });
-      updateallToolOptions();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      myPageTools.innerHTML = `
+          myPageTools.innerHTML += toolHTML;
+        });
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        myPageTools.innerHTML = `
       <span class="flex center-flex">You don't have any favorite tools</span>
-      `
-    });
+      `;
+      });
+  }
+
+  // Fetch favorite tools
 
   // AllmyPageForms
   let AllmyPageForms = [];
@@ -424,10 +474,46 @@ if (myPageMain) {
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
+        const userData = localStorage.getItem("userData");
+        const userId = JSON.parse(userData).userId;
+        const toolTitle = e.target[0].value;
+        const toolDescription = e.target[1].value;
+        let toolLink = e.target[2].value;
+        const toolCategoryId = e.target[3].value;
+
         switch (e.target) {
           case submitTool:
-            console.log("submitTool");
-            // ready for fetch integration
+            const postData = {
+              userId: userId,
+              toolTitle: toolTitle,
+              toolDescription: toolDescription,
+              toolLink: toolLink,
+              toolCategoryId: toolCategoryId,
+            };
+
+            const pattern = /^((http|https|ftp):\/\/)/;
+            if (!pattern.test(toolLink)) {
+              submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
+              break;
+            }
+
+            fetch(url + toolsEndpoint, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(postData),
+            })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                console.log(data);
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+
             break;
           case updateTool:
             console.log("updateTool");
