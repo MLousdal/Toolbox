@@ -2,6 +2,7 @@
 const url = "http://127.0.0.1:8118/api/";
 const loginEndpoint = "users/login";
 const signupEndpoint = "users/";
+const toolsEndpoint = "tools/";
 
 // toggle between categories
 const toolbox = document.querySelector(".toolbox");
@@ -50,6 +51,72 @@ if (toolbox) {
         break;
     }
   });
+}
+
+// Load all tools
+if (toolbox) {
+  const designTab = document.querySelector(".design");
+  const uxTab = document.querySelector(".UX");
+  const frontendTab = document.querySelector(".frontend");
+  const backendTab = document.querySelector(".backend");
+
+  const skeletons = document.querySelectorAll(".skeleton");
+
+  fetch(url + toolsEndpoint, {
+    method: "GET"
+  })
+    .then((response) => { return response.json(); })
+    .then((data) => {
+      skeletons.forEach(skeleton => {
+        skeleton.remove()
+      });
+
+      data.forEach(tool => {
+        switch (tool.category.categoryId) {
+          case 1:
+            designTab.innerHTML += `
+            <article class="tool">
+                <h4>${tool.toolTitle}</h4>
+                <p>${tool.toolDescription}</p>
+                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            </article>
+            `;
+            break;
+          case 2:
+            uxTab.innerHTML += `
+            <article class="tool">
+                <h4>${tool.toolTitle}</h4>
+                <p>${tool.toolDescription}</p>
+                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            </article>
+            `;
+            break;
+          case 3:
+            frontendTab.innerHTML += `
+            <article class="tool">
+                <h4>${tool.toolTitle}</h4>
+                <p>${tool.toolDescription}</p>
+                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            </article>
+            `;
+            break;
+          case 4:
+            backendTab.innerHTML += `
+            <article class="tool">
+                <h4>${tool.toolTitle}</h4>
+                <p>${tool.toolDescription}</p>
+                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            </article>
+            `;
+            break;
+          default:
+            break;
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 // Scroll arrow
@@ -163,10 +230,9 @@ if (forms) {
         return response.json();
       })
       .then((data) => {
-        console.log("data");
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
-        // window.location.href = "http://localhost:1234/forms.html";
+        window.location.href = "http://localhost:1234/forms.html";
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -190,6 +256,14 @@ if (token && token !== null) {
     localStorage.clear();
     window.location.href = "http://localhost:1234/index.html";
   });
+
+  const hero = document.querySelector(".hero");
+
+  if (hero) {
+    hero.style.padding = "0";
+    hero.classList.add("center-flex");
+    hero.children[2].classList.add("hide");
+  }
 }
 
 // myPage dashboard

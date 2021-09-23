@@ -1,14 +1,13 @@
 @use "../base/variables" as *;
 
-
 .toolbox {
-  padding-block: min(10vh, #{$spacing-l});
   display: flex; 
   flex-direction: column;
-  flex-wrap: no-wrap;
   justify-content: flex-start;
   gap: $spacing-xs;
-  
+  padding-bottom: $spacing-m;
+
+
   input[type="radio"] {
     display: none;
   }

@@ -5,10 +5,10 @@
     justify-content: space-between;
     flex-direction: row;
     gap: $spacing-l;
-    padding-block: min(10vh, #{$spacing-l});
     align-items: center;
 
     img {
+        padding-block: min(10vh, #{$spacing-l}); 
         width: 100%;
         max-width: 30rem;
     }
