@@ -6,7 +6,6 @@ Joi = require('joi'),
 
 con = config.get('dbConfig_UCN'),
  
- 
 // Error Handlers
  { TakeError } = require('../helpers/helpError');
 
@@ -69,7 +68,26 @@ class Tool {
         return schema.validate(toolWannabeeObj);
     }
 
-    static validate_newTool (newToolObj) {
+    static validate_favorite (favoriteArray) {
+        const schema = Joi.array()
+        .length(2) // -- There can only be 2 numbers in the array.
+            .items( // -- 2 numbers are required.
+                Joi
+                .number()
+                .integer()
+                .min(1)
+                .required(),
+                Joi
+                .number()
+                .integer()
+                .min(1)
+                .required()
+            );
+
+            return schema.validate(favoriteArray);
+    }
+
+    static validate_tool (newToolObj) {
         const schema = Joi.object({
             userId: Joi
                 .number()
@@ -320,9 +338,6 @@ class Tool {
                 // check if exactly one result
                 // keep toolid safe
                 // queryDB* (INSERT ToolAuthor) as many more times needed (with toolid)
-                // ((query DB query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid))) ==>
-                // close the DB because we are calling 
-                // Tool.readById(toolid)
                 // restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
                 // validate objects
                 // close DB connection
@@ -518,45 +533,8 @@ class Tool {
             })();
         });
     }
-
-    // static delete(toolid) {
-    //     return new Promise((resolve, reject) => {
-    //         (async () => {
-    //             // › › connect to DB
-    //             // › › query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid) <-- moving this before the DB connection, calling readById instead
-    //             // › › query DB (DELETE ToolAuthor WHERE toolid, DELETE Tool WHERE toolid)
-    //             // › › restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
-    //             // › › validate objects
-    //             // › › close DB connection
-
-    //             try {
-    //                 const tool = await Tool.readById(toolid);
-
-    //                 const pool = await sql.connect(con);
-    //                 const result = await pool.request()
-    //                     .input('toolid', sql.Int(), toolid)
-    //                     .query(`
-    //                     DELETE liloToolAuthor
-    //                     WHERE FK_toolid = @toolid;
-
-    //                     DELETE liloLoan
-    //                     WHERE FK_toolid = @toolid;
-
-    //                     DELETE liloTool
-    //                     WHERE toolid = @toolid
-    //                 `);
-
-    //                 resolve(tool);
-
-    //             } catch (error) {
-    //                 reject(error);
-    //             }
-
-    //             sql.close();
-
-    //         })();
-    //     });
-    // }
+    
+   
 
     update() {
         return new Promise((resolve, reject) => {

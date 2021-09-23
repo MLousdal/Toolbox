@@ -102,7 +102,7 @@ router.get('/:toolid', async (req, res, next) => {
 //------------------------POST-------------------------------
 
 
-//          POST /api/tools (title, description, link, categoryId)
+//          POST /api/tools (userId, title, description, link, categoryId)
 router.post('/', async (req, res, next) => {
     try {
         // Expected req.body:
@@ -113,7 +113,7 @@ router.post('/', async (req, res, next) => {
             //     toolLink: '',
             //     toolCategoryId: ''
             // }
-        const { error } = Tool.validate_newTool(req.body);
+        const { error } = Tool.validate_tool(req.body);
         if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
 
         const 
@@ -121,6 +121,34 @@ router.post('/', async (req, res, next) => {
         // -- and use the .create() to add to DB(If everything checks out)
         newTool = new Tool(req.body),
         tool = await newTool.create();
+        
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        next(err);
+    }
+});
+router.post('/favorite/:toolId/:userId', async (req, res, next) => {
+    let
+    toolid,
+    userid;
+
+    try {
+        if (req.params.toolId) toolid = parseInt(req.params.toolId);
+        if (req.params.userId) userid = parseInt(req.params.userId);
+
+        if (!toolid) {
+            throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        } else if (!userid) {
+            throw new TakeError(400, 'Bad request: userid = should refer a users id (integer)');
+        }
+
+        const
+        ids = [toolid, userid];
+        const { error } = Tool.validate_favorite(ids);
+        if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
+
+        const 
+        favorite = await Tool.create_favorite(ids);
         
         return res.send(JSON.stringify(tool));
     } catch (err) {
