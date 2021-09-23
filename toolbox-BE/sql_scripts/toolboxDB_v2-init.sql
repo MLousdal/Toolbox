@@ -200,8 +200,8 @@ GO
 INSERT INTO toolboxPassword
     ([passwordValue], [FK_userId])
 VALUES
-    ('admin', 1),
-    ('member', 2)
+    ('$2a$13$JziCT4oVJqOZQoGX2QPnR.iOlm2a60r.DAfJiR8dgoeItZU1uoh5W', 1), -- password before: admin
+    ('$2a$13$/TRMjdrSIikP9Y5U3wHcLOwemUVq7J6qQy5qwjWFbcXEPm4lucZLi', 2)  -- password before: member
 GO
 
 -- Tools

@@ -99,41 +99,32 @@ router.get('/:toolid', async (req, res, next) => {
     }
 });
 
-//        GET /api/tools/me (Own tools)
-
-router.get('/me', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › call await Tool.readById(req.params.toolid)
-    const { error } = Tool.validate(req.params);
-    if (error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    try {
-        const tool = await Tool.readById(req.params.toolid);
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
-
 //------------------------POST-------------------------------
 
-//          POST /api/tools (title, description, link, category, (icon))
 
-router.post('/', async (req, res) => {
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › instantiate tool = new Tool(req.body)
-    // › › call await tool.create()
-
-    const { error } = Tool.validate(req.body);
-    if (error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
+//          POST /api/tools (title, description, link, categoryId)
+router.post('/', async (req, res, next) => {
     try {
-        const newTool = new Tool(req.body);
-        const tool = await newTool.create();
+        // Expected req.body:
+            // {
+            //     userId: '', -- The creater of the tool
+            //     toolTitle: '',
+            //     toolDescription: '',
+            //     toolLink: '',
+            //     toolCategoryId: ''
+            // }
+        const { error } = Tool.validate_newTool(req.body);
+        if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
+
+        const 
+        // Create a new Tool from the req.body, 
+        // -- and use the .create() to add to DB(If everything checks out)
+        newTool = new Tool(req.body),
+        tool = await newTool.create();
+        
         return res.send(JSON.stringify(tool));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
 
