@@ -68,25 +68,6 @@ class Tool {
         return schema.validate(toolWannabeeObj);
     }
 
-    static validate_favorite (favoriteArray) {
-        const schema = Joi.array()
-        .length(2) // -- There can only be 2 numbers in the array.
-            .items( // -- 2 numbers are required.
-                Joi
-                .number()
-                .integer()
-                .min(1)
-                .required(),
-                Joi
-                .number()
-                .integer()
-                .min(1)
-                .required()
-            );
-
-            return schema.validate(favoriteArray);
-    }
-
     static validate_tool (newToolObj) {
         const schema = Joi.object({
             userId: Joi
@@ -381,7 +362,7 @@ class Tool {
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
                     if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
                     // If recordset is over 1, that means somehow the server created 2 of the same thing.
-                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!')
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
                     
                     const
                     set = result.recordset[0], 
@@ -407,129 +388,7 @@ class Tool {
                 } catch (err) {
                     reject(err);
                 }
-
-
-
-
-                try {
-                    this.tools.forEach(async (tool) => {
-                        const toolCheck = await Tool.readById(tool.toolid);
-                    });
-
-                    const pool = await sql.connect(con);
-                    const resultCheckTool = await pool.request()
-                        .input('toolTitle', sql.NVarChar(50), this.toolTitle)
-                        .input('toolDescription', sql.NVarChar(50), this.toolDescription)
-                        .input('toolLink', sql.NVarChar(255), this.toolLink)
-
-                        .query(`
-                            SELECT *
-                            FROM tool t
-                            WHERE t.toolTitle = @toolTitle AND @toolDescription = @toolDescription AND t.toolLink = @toolLink
-                        `)
-
-                    if (resultCheckTool.recordset.length == 1) throw { statusCode: 409, errorMessage: `Conflict. Tool already exists, toolid: ${resultCheckTool.recordset[0].toolid}` }
-                    if (resultCheckTool.recordset.length > 1) throw { statusCode: 500, errorMessage: `Multiple hits of unique data. Corrupt database, toolid: ${resultCheckTool.recordset[0].toolid}` }
-
-                    await pool.connect();
-                    const result00 = await pool.request()
-                        .input('toolTitle', sql.NVarChar(50), this.toolTitle)
-                        .input('toolDescription', sql.NVarChar(50), this.toolDescription)
-                        .input('toolLink', sql.NVarChar(255), this.toolLink)
-                        .query(`
-                               
-                        `)
-
-                    if (!result00.recordset[0]) throw { statusCode: 500, errorMessage: `DB server error, INSERT failed.` }
-                    const toolid = result00.recordset[0].toolid;
-
-                    this.tools.forEach(async (tool, index) => {
-                        if (index > 0) {
-                            await pool.connect();
-                            const resultTools = await pool.request()
-                                .input('toolid', sql.Int(), toolid)
-                                .query(`
-                                
-                                `)
-                        }
-                    })
-
-                    sql.close();
-
-                    const tool = await Tool.readById(toolid);
-
-                    resolve(tool);
-
-                } catch (error) {
-                    reject(error);
-                }
-
                 sql.close();
-
-                // try {
-                //     this.authors.forEach(async (author) => {
-                //         const authorCheck = await Author.readById(author.authorid);
-                //     });
-
-                //     const pool = await sql.connect(con);
-                //     const resultCheckTool = await pool.request()
-                //         .input('title', sql.NVarChar(50), this.title)
-                //         .input('year', sql.Int(), this.year)
-                //         .query(`
-                //             SELECT *
-                //             FROM liloTool b
-                //             WHERE b.title = @title AND b.year = @year
-                //         `)
-
-                //     if (resultCheckTool.recordset.length == 1) throw { statusCode: 409, errorMessage: `Conflict. Tool already exists, toolid: ${resultCheckTool.recordset[0].toolid}` }
-                //     if (resultCheckTool.recordset.length > 1) throw { statusCode: 500, errorMessage: `Multiple hits of unique data. Corrupt database, toolid: ${resultCheckTool.recordset[0].toolid}` }
-
-                //     await pool.connect();
-                //     const result00 = await pool.request()
-                //         .input('title', sql.NVarChar(50), this.title)
-                //         .input('year', sql.Int(), this.year)
-                //         .input('link', sql.NVarChar(255), this.link)
-                //         .input('authorid', sql.Int(), this.authors[0].authorid)
-                //         .query(`
-                //                 INSERT INTO liloTool (title, year, link)
-                //                 VALUES (@title, @year, @link);
-                        
-                //                 SELECT *
-                //                 FROM liloTool
-                //                 WHERE toolid = SCOPE_IDENTITY();
-
-                //                 INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
-                //                 VALUES (SCOPE_IDENTITY(), @authorid);
-                //         `)
-
-                //     if (!result00.recordset[0]) throw { statusCode: 500, errorMessage: `DB server error, INSERT failed.` }
-                //     const toolid = result00.recordset[0].toolid;
-
-                //     this.authors.forEach(async (author, index) => {
-                //         if (index > 0) {
-                //             await pool.connect();
-                //             const resultAuthors = await pool.request()
-                //                 .input('toolid', sql.Int(), toolid)
-                //                 .input('authorid', sql.Int(), author.authorid)
-                //                 .query(`
-                //                     INSERT INTO liloToolAuthor (FK_toolid, FK_authorid)
-                //                     VALUES (@toolid, @authorid)
-                //                 `)
-                //         }
-                //     })
-
-                //     sql.close();
-
-                //     const tool = await Tool.readById(toolid);
-
-                //     resolve(tool);
-
-                // } catch (error) {
-                //     reject(error);
-                // }
-
-                // sql.close();
-
             })();
         });
     }

@@ -3,6 +3,7 @@ express = require('express'),
 router = express.Router(),
 
 Tool = require('../models/tool'),
+Favorite = require('../models/favorite'),
 
 // Middleware
 auth = require('../middleware/authenticate'),
@@ -127,31 +128,24 @@ router.post('/', async (req, res, next) => {
         next(err);
     }
 });
-router.post('/favorite/:toolId/:userId', async (req, res, next) => {
-    let
-    toolid,
-    userid;
-
+router.post('/favorite', async (req, res, next) => {
     try {
-        if (req.params.toolId) toolid = parseInt(req.params.toolId);
-        if (req.params.userId) userid = parseInt(req.params.userId);
-
-        if (!toolid) {
-            throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
-        } else if (!userid) {
-            throw new TakeError(400, 'Bad request: userid = should refer a users id (integer)');
-        }
-
-        const
-        ids = [toolid, userid];
-        const { error } = Tool.validate_favorite(ids);
-        if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
+        // Expected req.body:
+            // {
+            //     toolId: '',
+            //     userId: ''
+            // }
+ 
+        const { error } = Favorite.validate(req.body);
+        if (error) throw new TakeError(400, 'Bad request: Favorite payload formatted incorrectly');
 
         const 
-        favorite = await Tool.create_favorite(ids);
+        newFavorite = new Favorite(req.body),
+        favorite = await newFavorite.create_favorite(newFavorite);
         
-        return res.send(JSON.stringify(tool));
+        return res.send(JSON.stringify(favorite));
     } catch (err) {
+        console.log(err)
         next(err);
     }
 });
