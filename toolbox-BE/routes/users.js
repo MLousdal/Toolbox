@@ -66,7 +66,7 @@ router.post('/', async (req, res, next) => {
 });
 
 //          POST /api/Users/login (LOGIN)
-router.post('/login', memberPlus, async (req, res, next) => {
+router.post('/login', async (req, res, next) => {
 
     console.log("ROUTER req.body: ", req.user)
     //Allows a "custom token" to be used.

@@ -12,42 +12,94 @@ con = config.get('dbConfig_UCN'),
 
 class Tool {
     constructor(toolObj) {
-        this.toolId = toolObj.toolId;
+        this.userId = toolObj.userId;
         this.toolTitle = toolObj.toolTitle;
         this.toolLink = toolObj.toolLink;
         this.toolDescription = toolObj.toolDescription;
-        this.categoryId = toolObj.categoryId;
-        this.categoryName = toolObj.categoryName;
+        this.toolCategoryId = toolObj.toolCategoryId;
     }
 
     static validate(toolWannabeeObj) {
         const schema = Joi.object({
-            toolId: Joi.number()
-                .integer()
-                .min(1)
-                .required(),
-            toolTitle: Joi.string()
-                .min(1)
-                .max(255)
-                .required(),
-            toolLink: Joi.string()
-                .uri()
-                .max(255)
-                .allow(null),   // <-- need to allow null values for links
-            toolDescription: Joi.string()
-                .max(255)
-                .allow(null),
-            category: Joi.object({
-                categoryId: Joi.number()
+            creator: Joi.object({
+                userId: Joi
+                    .number()
                     .integer()
                     .min(1)
                     .required(),
-                categoryName: Joi.string()
+                userName: Joi
+                    .string()
+                    .min(1)
+                    .max(50)
+                    .required(),
+            }),
+            toolId: Joi
+                .number()
+                .integer()
+                .min(1)
+                .required(),
+            toolTitle: Joi
+                .string()
+                .min(1)
+                .max(255)
+                .required(),
+            toolLink: Joi
+                .string()
+                .uri()
+                .min(1)
+                .max(255)
+                .required(),
+            toolDescription: Joi
+                .string()
+                .min(1)
+                .max(255)
+                .required(),
+            category: Joi.object({
+                categoryId: Joi
+                    .number()
+                    .integer()
+                    .min(1)
+                    .required(),
+                categoryName: Joi
+                    .string()
                     .max(50)
             })
         });
 
         return schema.validate(toolWannabeeObj);
+    }
+
+    static validate_newTool (newToolObj) {
+        const schema = Joi.object({
+            userId: Joi
+                .number()
+                .integer()
+                .min(1)
+                .required(),
+            toolTitle: Joi
+                .string()
+                .min(1)
+                .max(50)
+                .required(),
+            toolDescription: Joi
+                .string()
+                .min(1)
+                .max(255)
+                .required(),
+            toolLink: Joi
+                .string()
+                .uri()
+                .min(1)
+                .max(255)
+                .required(),
+            toolCategoryId: Joi
+                .number()
+                .integer()
+                .min(1)
+                .required()        
+        })
+
+        return schema.validate(newToolObj);
     }
 
     static readAll(toolId) {
@@ -262,19 +314,87 @@ class Tool {
     create() {
         return new Promise((resolve, reject) => {
             (async () => {
-                // › › check if authors exist in DB (i.e. Author.readById(authorid))
-                // › › connect to DB
-                // › › check if tool already exists in DB (e.g. matching title and year)
-                // › › query DB (INSERT Tool, SELECT Tool WHERE SCOPE_IDENTITY(), INSERT ToolAuthor)
-                // › › check if exactly one result
-                // › › keep toolid safe
-                // › › queryDB* (INSERT ToolAuthor) as many more times needed (with toolid)
-                // › › ((query DB query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid))) ==>
-                // › ›      close the DB because we are calling 
-                // › ›             Tool.readById(toolid)
-                // › › // restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
-                // › › // validate objects
-                // › › close DB connection
+                // connect to DB
+                // check if tool already exists in DB (e.g. matching title, link and category)
+                // query DB (INSERT Tool, SELECT Tool WHERE SCOPE_IDENTITY(), add Category and send new tool back)
+                // check if exactly one result
+                // keep toolid safe
+                // queryDB* (INSERT ToolAuthor) as many more times needed (with toolid)
+                // ((query DB query DB (SELECT Tool JOIN ToolAuthor JOIN Author WHERE toolid))) ==>
+                // close the DB because we are calling 
+                // Tool.readById(toolid)
+                // restructure DB result into the object structure needed (JOIN --> watch out for duplicates)
+                // validate objects
+                // close DB connection
+
+                try {
+                    const pool = await sql.connect(con);
+
+                    // Query (extra) info:
+                        // -- Inorder to check if the same tool already exist, we are looking for a tool with the same title, description and link. 
+                        // -- SCOPE_IDENTITY() is used to get the id that is given to the new tool, so we can send back that tools info to FE.
+                    const result = await pool.request()
+                    .input('userId', sql.NVarChar(50), this.userId)
+                    .input('toolTitle', sql.NVarChar(50), this.toolTitle)
+                    .input('toolDescription', sql.NVarChar(255), this.toolDescription)
+                    .input('toolLink', sql.NVarChar(255), this.toolLink)
+                    .input('toolCategoryId', sql.Int(), this.toolCategoryId)
+                    .query(`
+                        IF NOT (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxTool t
+                                WHERE t.toolTitle = @toolTitle AND t.toolDescription = @toolDescription AND t.toolLink = @toolLink 
+                            ))
+                        BEGIN
+                            INSERT INTO toolboxTool 
+                                ([toolTitle], [toolDescription], [toolLink], [toolStatus], [FK_userId], [FK_categoryId])
+                            VALUES
+                                (@toolTitle, @toolDescription, @toolLink, 'active', @userId, @toolCategoryId) ;
+                            
+                            SELECT SCOPE_IDENTITY() AS toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, u.userId, u.userName
+                            FROM toolboxTool t
+                            JOIN toolboxUser u
+                                ON u.userId = @userId
+                            JOIN toolboxCategory c
+                                ON t.FK_categoryId = c.categoryId
+                            WHERE t.toolId = SCOPE_IDENTITY() ;
+                        END
+                    `);
+                    console.log(result);
+                    
+                    // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
+                    // If recordset is over 1, that means somehow the server created 2 of the same thing.
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!')
+                    
+                    const
+                    set = result.recordset[0], 
+                    useResult = {
+                        creator: {
+                            userId: set.userId,
+                            userName: set.userName
+                        },
+                        toolId: set.toolId,
+                        toolTitle: set.toolTitle,
+                        toolLink: set.toolLink,
+                        toolDescription: set.toolDescription,
+                        category: {
+                            categoryId: set.categoryId,
+                            categoryName: set.categoryName
+                        }
+                    },
+                    // Is the data we got back from the DB formatted correctly?
+                    { error } = Tool.validate(useResult);
+                    if (error) throw new TakeError(500, 'Internal Server Error: Tool informaion in database is corrupted!');
+
+                    resolve(useResult);
+                } catch (err) {
+                    reject(err);
+                }
+
+
+
 
                 try {
                     this.tools.forEach(async (tool) => {
