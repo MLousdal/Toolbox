@@ -126,14 +126,6 @@ router.post('/', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-
-    try {
-        const newTool = new Tool(req.body);
-        const tool = await newTool.create();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
 });
 
 
