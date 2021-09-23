@@ -114,42 +114,25 @@ if (toolbox) {
     .then((data) => {
       removeSkeletons();
       data.forEach((tool) => {
+        const toolHTML = `
+        <article class="tool">
+            <h4>${tool.toolTitle}</h4>
+            <p>${tool.toolDescription}</p>
+            <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+        </article>
+        `;
         switch (tool.category.categoryId) {
           case 1:
-            designTab.innerHTML += `
-            <article class="tool">
-                <h4>${tool.toolTitle}</h4>
-                <p>${tool.toolDescription}</p>
-                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            </article>
-            `;
+            designTab.innerHTML += toolHTML
             break;
           case 2:
-            uxTab.innerHTML += `
-            <article class="tool">
-                <h4>${tool.toolTitle}</h4>
-                <p>${tool.toolDescription}</p>
-                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            </article>
-            `;
+            uxTab.innerHTML += toolHTML
             break;
           case 3:
-            frontendTab.innerHTML += `
-            <article class="tool">
-                <h4>${tool.toolTitle}</h4>
-                <p>${tool.toolDescription}</p>
-                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            </article>
-            `;
+            frontendTab.innerHTML += toolHTML
             break;
           case 4:
-            backendTab.innerHTML += `
-            <article class="tool">
-                <h4>${tool.toolTitle}</h4>
-                <p>${tool.toolDescription}</p>
-                <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            </article>
-            `;
+            backendTab.innerHTML += toolHTML
             break;
           default:
             break;
@@ -343,7 +326,7 @@ if (myPageMain) {
         const title = tool.children[0].children[0].innerHTML;
         const desc = tool.children[0].children[1].innerHTML;
         const link = tool.children[0].children[2].href;
-
+        
         switch (e.target) {
           case optionsBtn:
             options.classList.toggle("flex");
@@ -402,13 +385,16 @@ if (myPageMain) {
     .then((data) => {
       removeSkeletons();
       data.forEach((tool) => {
+        const toolHTML = `
+        <article class="tool">
+            <h4>${tool.toolTitle}</h4>
+            <p>${tool.toolDescription}</p>
+            <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+        </article>
+        `;
         myPageTools.innerHTML += `
         <div class="toolOptions">
-        <article class="tool">
-          <h4>${tool.toolTitle}</h4>
-          <p>${tool.toolDescription}</p>
-          <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-        </article>
+        ${toolHTML}
         <div class="options">
           <button class="update btn">update</button>
           <button class="delete btn">delete</button>
