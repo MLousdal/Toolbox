@@ -338,6 +338,7 @@ if (myPageMain) {
       const myPageForms = document.querySelector(".myPageForms");
 
       tool.addEventListener("click", (e) => {
+        const id = tool.children[0].dataset.toolid;
         const title = tool.children[0].children[0].innerHTML;
         const desc = tool.children[0].children[1].innerHTML;
         const link = tool.children[0].children[2].href;
@@ -348,7 +349,7 @@ if (myPageMain) {
             break;
           case updateBtn:
             myPageForms.innerHTML += `
-              <form id="updateTool">
+              <form id="updateTool" data-id="${id}">
               <h3>Update: ${title}</h3>
               <label for="Utitel">title: 
               <input type="text" id="Utitel" name="updateTool" required value="${title}">
@@ -362,10 +363,10 @@ if (myPageMain) {
               <label for="Ucategory">category: 
               <select name="updateTool" id="Ucategory" required>
               <option value="">--Please choose a category --</option>
-              <option value="design">Design</option>
-              <option value="UX">UX</option>
-              <option value="frontend">frontend</option>
-              <option value="backend">backend</option>
+              <option value="1">Design</option>
+              <option value="2">UX</option>
+              <option value="3">frontend</option>
+              <option value="4">backend</option>
               </select>
               </label>
               <button class="btn active" id="UoldTool">submit</button>
@@ -403,7 +404,7 @@ if (myPageMain) {
         removeSkeletons();
         data.forEach((tool) => {
           const toolHTML = `
-          <article class="tool">
+          <article class="tool" data-toolID="${tool.toolId}">
               <h4>${tool.toolTitle}</h4>
               <p>${tool.toolDescription}</p>
               <a href="${tool.toolLink}" target="_blank">visit tool..</a>
@@ -432,7 +433,6 @@ if (myPageMain) {
 
   // if member
   if (userRole == 2) {
-    console.log("member");
     fetch(url + toolsEndpoint + favoritEndpoint + userId, {
       method: "GET",
     })
@@ -460,8 +460,6 @@ if (myPageMain) {
       });
   }
 
-  // Fetch favorite tools
-
   // AllmyPageForms
   let AllmyPageForms = [];
 
@@ -476,22 +474,24 @@ if (myPageMain) {
         e.preventDefault();
         const userData = localStorage.getItem("userData");
         const userId = JSON.parse(userData).userId;
+        const toolToolId = e.target.dataset.id;
+        console.log(toolToolId)
         const toolTitle = e.target[0].value;
         const toolDescription = e.target[1].value;
         let toolLink = e.target[2].value;
         const toolCategoryId = e.target[3].value;
 
+        const pattern = /^((http|https|ftp):\/\/)/;
+
         switch (e.target) {
           case submitTool:
-            const postData = {
+            let postData = {
               userId: userId,
               toolTitle: toolTitle,
               toolDescription: toolDescription,
               toolLink: toolLink,
               toolCategoryId: toolCategoryId,
             };
-
-            const pattern = /^((http|https|ftp):\/\/)/;
             if (!pattern.test(toolLink)) {
               submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
               break;
@@ -513,11 +513,37 @@ if (myPageMain) {
               .catch((error) => {
                 console.error("Error:", error);
               });
-
             break;
           case updateTool:
-            console.log("updateTool");
-            // ready for fetch integration
+            updateData = {
+              userId: userId,
+              toolTitle: toolTitle,
+              toolDescription: toolDescription,
+              toolLink: toolLink,
+              toolCategoryId: toolCategoryId,
+            };
+
+            if (!pattern.test(toolLink)) {
+              submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
+              break;
+            }
+
+            fetch(url + toolsEndpoint + toolToolId, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(updateData),
+            })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                console.log(data);
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
             break;
           default:
             break;
