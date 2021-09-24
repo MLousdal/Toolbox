@@ -18,24 +18,24 @@ con = config.get('dbConfig_UCN'),
          this.userId = favObj.userId;
      }
 
-    static validate (favoriteArray) {
+    static validate (favoriteObject) {
         const schema = Joi.object({
-            toolId: Joi
+            userId: Joi
                 .number()
                 .integer()
                 .min(1)
                 .required(),
-            userId: Joi
+            toolId: Joi
                 .number()
                 .integer()
                 .min(1)
                 .required()
         })
 
-        return schema.validate(favoriteArray);
+        return schema.validate(favoriteObject);
     }
 
-    static validate_result (favoriteArray) {
+    static validate_result (favoriteObj) {
         const schema = Joi.object({
             toolId: Joi
                     .number()
@@ -70,7 +70,7 @@ con = config.get('dbConfig_UCN'),
                 })
         });
 
-        return schema.validate(favoriteArray);
+        return schema.validate(favoriteObj);
     }
     
     create_favorite () {
@@ -141,6 +141,65 @@ con = config.get('dbConfig_UCN'),
                     reject(err);
                 }
                 sql.close();
+            })();
+        })
+    }
+
+    static delete (faveObj) {
+        return new Promise ((resolve,reject) => {
+            (async () => {
+                try {
+                    const 
+                    pool = await sql.connect(con),
+                    // In query we have to find the row where both userId and toolId are present. After that SELECT tool = @toolid, so send what tool have been removed from toolboxFavorite.
+                    result = await pool.request()
+                    .input('userId', sql.Int(), faveObj.userId)
+                    .input('toolId', sql.Int(), faveObj.toolId)
+                    .query(`
+                        IF (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxFavorite f
+                                WHERE f.FK_userId = @userId AND f.FK_toolId = @toolId
+                            )
+                        )
+                        BEGIN
+                            DELETE toolboxFavorite
+                            WHERE FK_userId = @userId AND FK_toolId = @toolId ;
+        
+                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                            FROM toolboxTool t
+                            JOIN toolboxCategory c
+                                ON t.FK_categoryId = c.categoryId
+                            WHERE t.toolId = @toolId ;
+                        END
+                    `);
+
+                    // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided favorite Data-combination, can not be found!');
+                    // If recordset is over 1, that means somehow the server created 2 of the same thing.
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when deleting selected Favorite!');
+
+                    const
+                    set = result.recordset[0], 
+                    useResult = {
+                        toolId: set.toolId,
+                        toolTitle: set.toolTitle,
+                        toolLink: set.toolLink,
+                        toolDescription: set.toolDescription,
+                        category: {
+                            categoryId: set.categoryId,
+                            categoryName: set.categoryName
+                        }
+                    },
+                    // Is the data we got back from the DB formatted correctly?
+                    { error } = Favorite.validate_result(useResult);
+                    if (error) throw new TakeError(500, 'Internal Server Error: Tool informaion in database is corrupted!');
+
+                    resolve(useResult);
+                } catch (err) {
+                    reject(err);
+                }
             })();
         })
     }
