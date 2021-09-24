@@ -429,6 +429,7 @@ class Tool {
 
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
                     if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided tool could not be deleted!');
+
                     // If recordset is over 1, that means somehow the server created 2 of the same thing.
                     if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
 
