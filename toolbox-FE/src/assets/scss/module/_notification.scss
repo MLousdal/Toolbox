@@ -1,11 +1,19 @@
 @use "../base/variables" as *;
 
-.notification {
-  padding: $unit-1;
+.notifications {
+  display: flex;
+  flex-direction: column;
+  gap: $unit-1;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: $unit-5;
   left: 50%;
   transform: translatex(-50%);
-  width: fit-content;
-  
+
+  .notification {
+    font-size: 0.8rem;
+    padding: $unit-05;
+    width: fit-content;
+  }
 }

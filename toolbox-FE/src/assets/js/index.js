@@ -152,7 +152,6 @@ function favoriteBtn() {
       signal = controller.signal;
 
       const toolToolId = e.target.parentElement.dataset.id;
-      console.log(toolToolId)
 
       const data = {
         toolId: toolToolId,
@@ -169,13 +168,16 @@ function favoriteBtn() {
       })
         .then((response) => {
           if (response.status == 409) {
-            console.log("already a favorite");
+            document.querySelector(".notifications").innerHTML = `<span class="notification box background-error">Already a favorite</span>`;
+            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
             controller.abort();
           }
           return response.json();
         })
         .then((data) => {
-          console.log("Added: " + data + "to favorites");
+          document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully added from favorites</span>`;
+          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+          favoriteBtn()
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -206,16 +208,15 @@ function unfavoriteBtn() {
         })
           .then((response) => {
             if (response.status == 409) {
-              console.log("already a favorite")
               controller.abort();
             }
             return response.json();
           })
           .then((data) => {
             e.target.parentElement.remove();
-            console.log("Removed: " + data + "from favorites");
-            document.querySelector("body").innerHTML += `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
+            document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
             setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+            unfavoriteBtn()
           })
           .catch((error) => {
             console.error("Error:", error);
@@ -325,9 +326,10 @@ if (forms) {
     })
       .then((response) => {
         if (response.status !== 200) {
-          Loutput.innerHTML = `
-          <span>ERROR: email or password is incorrect</span>
+          document.querySelector(".notifications").innerHTML = `
+          <span class="notification box background-error">email or password is incorrect</span>
           `;
+          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
           controller.abort();
           loginForm.querySelector(".btn").classList.remove("loading");
         }
@@ -360,7 +362,6 @@ if (forms) {
       userPassword: SUpassword.value,
     };
 
-    const SUoutput = document.querySelector("#SUoutput");
     fetch(url + signupEndpoint, {
       method: "POST",
       headers: {
@@ -371,10 +372,11 @@ if (forms) {
     })
       .then((response) => {
         if (response.status !== 200) {
-          SUoutput.innerHTML = `
-        <span>ERROR: Account not created</span>
+          document.querySelector(".notifications").innerHTML = `
+        <span class="notification box background-error">ERROR: Account not created</span>
         `;
-          controller.abort();
+        setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+        controller.abort();
         }
         return response.json();
       })
