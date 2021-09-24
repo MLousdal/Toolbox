@@ -152,11 +152,36 @@ router.post('/favorite', async (req, res, next) => {
         next(err);
     }
 });
+//------------------------------------------------------------------------------------------
+//------------------------------------ PUT  ALL TYPES --------------------------------------
+//------------------------------------------------------------------------------------------
 
-//------------------------PUT-------------------------------
+//------------------------------------ PUT(SOFT-DELETE) ------------------------------------
+// This router is for:
+    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)!
+    // What is needed:
+        // In the path:
+        // -- /delete/ follow by the id of the tool that should be "removed"!.
+        router.put('/delete/:toolid', async (req, res, next) => {
+            let toolId; // Used to check if we have correct req.params.
+            try {
+                if (req.params.toolid) toolId = parseInt(req.params.toolid);
+                if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        
+                const deactivatTool = await Tool.soft_delete(toolId);
+        
+                return res.send(JSON.stringify(deactivatTool));
+            } catch(err) {
+                next(err);
+            }
+        });
 
-//          PUT /api/tools/:userId/:toolID
-router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
+// This router is for:
+    // -- If a user want to UPDATE a tools data!
+    // What is needed:
+        // In the path:
+        // -- .
+router.put('/:userid/:toolid', async (req, res, next) => { // -- Member+ ?
     let toolId, userId;
     try {
         // Expected req.body:
@@ -223,21 +248,6 @@ router.put('/:toolid', async (req, res) => {
     } catch (err) {
         return res.status(500).send(JSON.stringify({ errorMessage: err }));
     }
-});
-
-//------------------------------------ PUT(SOFT-DELETE) ------------------------------------
-
-// This router is for:
-    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)!
-    // What is needed:
-        // In the path:
-        // -- /delete/ follow by the id of the tool that should be removed!.
-router.put('/delete/:toolid', async (req, res) => {
-    let toolId; // Used to check if we have correct req.params.
-    if (req.params.toolid) toolId = parseInt(req.params.toolid);
-
-    
-
 });
 
 // ---------------------------------------- DELETE ------------------------------------------
