@@ -106,7 +106,6 @@ router.get('/:toolid', async (req, res, next) => {
 
 //------------------------POST-------------------------------
 
-
 //          POST /api/tools (userId, title, description, link, categoryId)
 router.post('/', async (req, res, next) => {
     try {
