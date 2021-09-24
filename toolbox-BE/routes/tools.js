@@ -225,53 +225,19 @@ router.put('/:toolid', async (req, res) => {
     }
 });
 
-//------------------------PUT(SOFT-DELETE)-------------------------------
+//------------------------------------ PUT(SOFT-DELETE) ------------------------------------
 
-//          PUT /api/tools/delete/me (MEMBER - DELETE OWN TOOL)
-
-router.put('/delete/me', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-//          PUT /api/tools/delete/:toolID (ADMIN - DELETE ANY)
-
+// This router is for:
+    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)!
+    // What is needed:
+        // In the path:
+        // -- /delete/ follow by the id of the tool that should be removed!.
 router.put('/delete/:toolid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
+    let toolId; // Used to check if we have correct req.params.
+    if (req.params.toolid) toolId = parseInt(req.params.toolid);
 
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
+    
 
-    try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
 });
 
 // ---------------------------------------- DELETE ------------------------------------------
@@ -279,10 +245,10 @@ router.put('/delete/:toolid', async (req, res) => {
 // This router is for:
     // -- If a user want to remove a Tool from it's favorite list!
     // What is needed:
-    // In the path:
-    // -- a userId for who want to remove a favorite.
-    // -- a toolId for want tool should removed from favorite.
-router.delete('/:userid/:toolid', async (req, res, next) => {    
+        // In the path:
+        // -- a userId for who want to remove a favorite.
+        // -- a toolId for want tool should removed from favorite.
+router.delete('/:userid/:toolid', memberPlus, async (req, res, next) => {    
     try {
         // Validate if the req.body is formatted the way we expect!
         let toolId, userId;
