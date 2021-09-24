@@ -192,7 +192,7 @@ con = config.get('dbConfig_UCN'),
                             categoryName: set.categoryName
                         }
                     },
-                    // Is the data we got back from the DB formatted correctly?
+                    // Is the data we got back from the DB formatted correctly in useResult?
                     { error } = Favorite.validate_result(useResult);
                     if (error) throw new TakeError(500, 'Internal Server Error: Tool informaion in database is corrupted!');
 
