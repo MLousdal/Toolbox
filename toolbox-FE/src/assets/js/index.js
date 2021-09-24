@@ -134,16 +134,25 @@ function removeSkeletons() {
 // favorite button
 function favoriteBtn() {
   let allfavoriteBtn = document.querySelectorAll(".favorite");
-  const userData = localStorage.getItem("userData");
-  const userId = JSON.parse(userData).userId;
-  console.log(userId);
+
+  if (token) { 
+    userData = localStorage.getItem("userData");
+    userId = JSON.parse(userData).userId;
+  }
+
+  if (!token) {
+    allfavoriteBtn.forEach((btn) => {
+      btn.classList.add("hide");
+    });
+  }
 
   allfavoriteBtn.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       controller = new AbortController();
       signal = controller.signal;
 
-      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+      const toolToolId = e.target.parentElement.dataset.id;
+      console.log(toolToolId)
 
       const data = {
         toolId: toolToolId,
@@ -264,6 +273,7 @@ if (toolbox) {
     .catch((error) => {
       console.error("Error:", error);
     });
+
 }
 
 // -- login & signup --
@@ -306,6 +316,7 @@ if (forms) {
     };
 
     const Loutput = document.querySelector("#Loutput");
+    loginForm.querySelector(".btn").classList.add("loading");
 
     fetch(url + loginEndpoint, {
       method: "POST",
@@ -321,6 +332,7 @@ if (forms) {
           <span>ERROR: email or password is incorrect</span>
           `;
           controller.abort();
+          loginForm.querySelector(".btn").classList.remove("loading");
         }
         const toolboxToken = response.headers.get("toolbox-token");
         localStorage.setItem("toolbox-token", toolboxToken);
@@ -329,6 +341,7 @@ if (forms) {
       .then((data) => {
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
+        loginForm.querySelector(".btn").classList.remove("loading");
         window.location.href = "http://localhost:1234/index.html";
       })
       .catch((error) => {
@@ -645,10 +658,6 @@ if (myPageMain) {
               toolCategoryId: toolCategoryId,
             };
 
-            if (!pattern.test(toolLink)) {
-              submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
-              break;
-            }
             console.log(url + toolsEndpoint + userId + "/" + toolToolId);
 
             fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
