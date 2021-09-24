@@ -364,9 +364,9 @@ class Tool {
                     `);
 
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
-                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: A tool could not be found with the provided userId or toolId!');
                     // If recordset is over 1, that means somehow the server created 2 of the same thing.
-                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when UPDATEing the new Tool!');
 
                     const
                     set = result.recordset[0], 
