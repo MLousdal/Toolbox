@@ -26,15 +26,16 @@ window.onload = () => {
   }
 };
 
-const themeToggle = document.querySelector("#themeToggle");
-if (themeToggle) {
-  themeToggle.addEventListener("click", () => {
+document.addEventListener("keydown", themeToggle);
+
+function themeToggle(key) {
+  if (key.code == "Digit1") {
     if (body.classList.contains("theme-light")) {
       body.classList.replace("theme-light", "theme-dark");
     } else {
       body.classList.replace("theme-dark", "theme-light");
     }
-  });
+  }
 }
 
 // check if logged in
@@ -135,6 +136,7 @@ function favoriteBtn() {
   let allfavoriteBtn = document.querySelectorAll(".favorite");
   const userData = localStorage.getItem("userData");
   const userId = JSON.parse(userData).userId;
+  console.log(userId);
 
   allfavoriteBtn.forEach((btn) => {
     btn.addEventListener("click", (e) => {
