@@ -1,3 +1,4 @@
+const { application } = require('express');
 const { required } = require('joi');
 
 const 
@@ -44,10 +45,16 @@ adminAuth = [auth, auth_admin],
 // /api/tools/delete/:me/:toolId
 // /api/tools/delete/:toolID
 
+            // *************************
+            // ******** TIPS ***********
+            // *************************
+// How to order routes? Reference: https://gabrieleromanato.name/order-of-routes-when-using-parameters-in-expressjs
+// It sould be from least specific to most specific, like so:
+// router.get('/)
+// router.get('/tools)
+// router.get('/:toolId)
 
 // ---------------------------------------------------------
-
-
 
 //------------------------GET-------------------------------
 
@@ -152,13 +159,36 @@ router.post('/favorite', async (req, res, next) => {
         next(err);
     }
 });
+//------------------------------------------------------------------------------------------
+//------------------------------------ PUT ALL TYPES ---------------------------------------
+//------------------------------------------------------------------------------------------
 
+//------------------------------------ PUT(SOFT-DELETE) ------------------------------------
+// This router is for:
+    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)!
+    // What is needed:
+        // In the path:
+        // -- /delete/ follow by the id of the tool that should be "removed"!.
+        router.put('/delete/:toolid', async (req, res, next) => {
+            let toolId; // Used to check if we have correct req.params.
+            try {
+                if (req.params.toolid) toolId = parseInt(req.params.toolid);
+                if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        
+                const deactivatTool = await Tool.soft_delete(toolId);
+        
+                return res.send(JSON.stringify(deactivatTool));
+            } catch(err) {
+                next(err);
+            }
+        });
 
-
-//------------------------PUT-------------------------------
-
-//          PUT /api/tools/:userId/:toolID
-router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
+// This router is for:
+    // -- If a user want to UPDATE a tools data!
+    // What is needed:
+        // In the path:
+        // -- .
+router.put('/:userid/:toolid', async (req, res, next) => { // -- Member+ ?
     let toolId, userId;
     try {
         // Expected req.body:
@@ -168,12 +198,12 @@ router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
             //     toolLink: '',
             //     toolCategoryId: ''
             // }
-            // Let's add the userId, and toolId from req.params
-        if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
+            // Add the userId, and toolId from req.params
+        if (req.params.userid) { 
             userId = parseInt(req.params.userid);
             req.body.userId = userId;
         }
-        if (req.params.toolid) { // Params stores the values from URL segmets like :me as params.me
+        if (req.params.toolid) {
             toolId = parseInt(req.params.toolid);
             req.body.toolId = toolId;
         }
@@ -198,20 +228,6 @@ router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
 });
 
 
@@ -224,7 +240,6 @@ router.put('/:toolid', async (req, res) => {
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
 
-
     const toolidValidate = Tool.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
@@ -241,54 +256,40 @@ router.put('/:toolid', async (req, res) => {
     }
 });
 
-//------------------------PUT(SOFT-DELETE)-------------------------------
+// ---------------------------------------- DELETE ------------------------------------------
 
-//          PUT /api/tools/delete/me (MEMBER - DELETE OWN TOOL)
-
-router.put('/delete/me', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
+// This router is for:
+    // -- If a user want to remove a Tool from it's favorite list!
+    // What is needed:
+        // In the path:
+        // -- a userId for who want to remove a favorite.
+        // -- a toolId for want tool should removed from favorite.
+router.delete('/:userid/:toolid', memberPlus, async (req, res, next) => {    
     try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
+        // Validate if the req.body is formatted the way we expect!
+        let toolId, userId;
+        if (req.params.userid) userId = parseInt(req.params.userid);
+        if (req.params.toolid) toolId = parseInt(req.params.toolid);
+        
+        // If toolId or userId is empty, that means that the parameter couldn't be converted to an Integer.
+        if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        if (!userId) throw new TakeError(400, 'Bad request: userid = should refer a users id (integer)');
+        
+        const 
+        ids = {
+            userId: userId,
+            toolId: toolId
+        },
+        { error } = Favorite.validate(ids);
+        if (error) throw new TakeError(400, 'Bad request: DELETE payload formatted incorrectly');
+        
+        
+        const tool = await Favorite.delete(ids);
+        console.log("!!!!!!!!!!")
         return res.send(JSON.stringify(tool));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
-//          PUT /api/tools/delete/:toolID (ADMIN - DELETE ANY)
-
-router.put('/delete/:toolid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
-    try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
-        return res.send(JSON.stringify(tool));
-    } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
-    }
-});
-
 
 module.exports = router;

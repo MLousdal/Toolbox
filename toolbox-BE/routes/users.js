@@ -1,8 +1,3 @@
-// *** previously logins.js --> Users.js
-// now serving endpoints:
-//      POST    /api/Users/login
-//      POST    /api/Users
-
 const 
 express = require('express'),
 router = express.Router(),
@@ -21,6 +16,8 @@ auth_member_plus = require('../middleware/member_plus'),
 memberPlus = [auth, auth_member_plus],
 
 // Admin
+auth_admin = require('../middleware/admin'),
+adminAuth = [auth, auth_admin],
 
 
 // Error handler

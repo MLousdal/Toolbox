@@ -8,7 +8,7 @@ class TakeError extends Error {
     }
 }
 function useError (err, res) {
-    const { statusCode, message} = err; // This will destructure err in to 2 parts. The first part of the obj will be called statusCode (like, let statusCode = err[0]), and second part will be called message (err[1]).
+    const { statusCode, message } = err; // This will destructure err in to 2 parts. The first part of the obj will be called statusCode (like, let statusCode = err[0]), and second part will be called message (err[1]).
     res.status(statusCode).send(JSON.stringify({
         status: "Error",
         statusCode,
