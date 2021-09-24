@@ -98,6 +98,94 @@ function removeSkeletons() {
   });
 }
 
+// favorite button
+function favoriteBtn() {
+  let allfavoriteBtn = document.querySelectorAll(".favorite");
+  const userData = localStorage.getItem("userData");
+  const userId = JSON.parse(userData).userId;
+
+  allfavoriteBtn.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      controller = new AbortController();
+      signal = controller.signal;
+
+      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+
+      const data = {
+        "toolId": toolToolId,
+        "userId": userId
+      }
+
+      fetch(url + toolsEndpoint+ favoritEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      })
+        .then((response) => {
+          if (response.status == 409) {
+            console.log("already a favorite")
+            controller.abort();
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Added: " + data + "to favorites");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    });
+  });
+}
+
+// unfavorite button
+function unfavoriteBtn() {
+  let allUnfavoriteBtn = document.querySelectorAll(".unfavorite");
+  const userData = localStorage.getItem("userData");
+  const userId = JSON.parse(userData).userId;
+
+  allUnfavoriteBtn.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+
+      console.log("unfavorited: " + toolToolId)
+
+      const data = {
+        "toolId": toolToolId,
+        "userId": userId
+      }
+      // fetch delete ready :D
+
+    //   fetch(url + toolsEndpoint + favoritEndpoint, {
+    //     method: "DELETE",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(data),
+    //     signal: controller.signal
+    //   })
+    //     .then((response) => {
+    //       if (response.status == 409) {
+    //         console.log("already a favorite")
+    //         controller.abort();
+    //       }
+    //       return response.json();
+    //     })
+    //     .then((data) => {
+    //       console.log("Added: " + data + "to favorites");
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error:", error);
+    //     });
+    });
+  });
+}
+
+
+
 // Load all tools
 if (toolbox) {
   const designTab = document.querySelector(".design");
@@ -115,10 +203,13 @@ if (toolbox) {
       removeSkeletons();
       data.forEach((tool) => {
         const toolHTML = `
-        <article class="tool">
+        <article class="tool" data-id="${tool.toolId}">
             <h4>${tool.toolTitle}</h4>
             <p>${tool.toolDescription}</p>
             <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            <button class="icon favorite">
+              <img src="plus.svg" class="icon">
+            </button>
         </article>
         `;
         switch (tool.category.categoryId) {
@@ -138,6 +229,7 @@ if (toolbox) {
             break;
         }
       });
+      favoriteBtn();
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -325,9 +417,7 @@ if (myPageMain) {
   const myPageTools = document.querySelector(".tools");
 
   // tool options
-  let toolOptionsArr = [];
-
-  function updateallToolOptions() {
+  function toolOptions() {
     let toolOptionsArr = document.querySelectorAll(".toolOptions");
     toolOptionsArr.forEach((tool) => {
       const options = tool.children[1];
@@ -421,7 +511,7 @@ if (myPageMain) {
           </div>
           `;
         });
-        updateallToolOptions();
+        toolOptions();
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -443,14 +533,18 @@ if (myPageMain) {
         removeSkeletons();
         data.forEach((tool) => {
           const toolHTML = `
-        <article class="tool">
+        <article class="tool" data-id="${tool.toolId}">
             <h4>${tool.toolTitle}</h4>
             <p>${tool.toolDescription}</p>
             <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            <button class="icon unfavorite">
+            <img src="minus.svg" class="icon">
+            </button>
         </article>
         `;
           myPageTools.innerHTML += toolHTML;
         });
+        unfavoriteBtn()
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -461,8 +555,6 @@ if (myPageMain) {
   }
 
   // AllmyPageForms
-  let AllmyPageForms = [];
-
   function updateAllmyPageForms() {
     let AllmyPageForms = document.querySelectorAll(".myPageForms form");
 
@@ -475,7 +567,6 @@ if (myPageMain) {
         const userData = localStorage.getItem("userData");
         const userId = JSON.parse(userData).userId;
         const toolToolId = e.target.dataset.id;
-        console.log(toolToolId)
         const toolTitle = e.target[0].value;
         const toolDescription = e.target[1].value;
         const toolLink = e.target[2].value;
@@ -526,7 +617,7 @@ if (myPageMain) {
               submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
               break;
             }
-            console.log(url + toolsEndpoint + userId + "/" + toolToolId)
+            console.log(url + toolsEndpoint + userId + "/" + toolToolId);
 
             fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
               method: "PUT",
