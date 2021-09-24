@@ -1,22 +1,24 @@
 {
-  "name": "webtemplatev2",
+  "name": "Toolbox",
   "version": "1.0.0",
-  "description": "webTemplate is a template for websites that supply me with the variables, and classes I need to start a new project! 🚀",
+  "description": "WAD elective exam project by group 2",
   "keywords": [],
-  "author": "Mads Lousdal",
-  "url": "madslousdal.dk",
+  "author": "group 2",
   "license": "MIT",
   "source": "src/index.html",
   "scripts": {
-    "dev": "parcel",
-    "build": "parcel build"
+    "dev": "parcel --no-cache",
+    "build": "parcel build --public-url ./"
   },
   "devDependencies": {
     "@parcel/transformer-image": "^2.0.0-rc.0",
     "@parcel/transformer-sass": "^2.0.0-rc.0",
     "autoprefixer": "^10.3.2",
     "parcel": "^2.0.0-rc.0",
+    "parcel-plugin-static-files-copy": "^2.6.0",
+    "parcel-reporter-static-files-copy": "^1.3.0",
     "sass": "^1.38.1"
   },
   "dependencies": {}
+
 }

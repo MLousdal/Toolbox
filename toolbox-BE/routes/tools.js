@@ -118,7 +118,7 @@ router.post('/', async (req, res, next) => {
     try {
         // Expected req.body:
             // {
-            //     userId: '', -- The creater of the tool
+            //     userId: '', -- The creator of the tool
             //     toolTitle: '',
             //     toolDescription: '',
             //     toolLink: '',

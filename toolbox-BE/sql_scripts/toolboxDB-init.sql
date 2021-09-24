@@ -1,4 +1,4 @@
-USE [1086088]
+USE [1086118]
 GO
 -- --------------------------------------------
 -- --- TIPS AND TRICKS / THINGS TO REMEMBER ---
@@ -184,7 +184,7 @@ VALUES
     ('Unsplash', 'The internet’s source of freely-usable images. Powered by creators everywhere.', 'https://unsplash.com/', 'active', 1, 1),
     ('Coverr', 'Beautiful Free Stock Video Footage', 'https://coverr.co/', 'active', 1, 1),
     ('Open Doodles', 'A Free Set of Open-Source Illustrations!', 'https://opendoodles.com/', 'active', 1, 1),
-    ('GlooMaps', 'https://www.gloomaps.com/', 'https://www.gloomaps.com/', 'active', 1, 2),
+    ('GlooMaps', 'A simple and fast online sitemapping tool.', 'https://www.gloomaps.com/', 'active', 1, 2),
     ('UXMISFITS', 'A great blog for learning UX', 'https://uxmisfit.com/', 'active', 1, 2),
     ('Growth design', 'Get product tips in a comic book format you’ll love to read.', 'https://growth.design/', 'active', 1, 2),
     ('Miro', 'The online collaborative whiteboard platform to bring teams together, anytime, anywhere.', 'https://miro.com/', 'active', 1, 2),
@@ -195,7 +195,7 @@ VALUES
     ('Squoosh', 'Super good image compressor', 'https://squoosh.app/', 'active', 1, 3),
     ('Animate.css', 'Just-add-water CSS animations', 'https://animate.style/', 'active', 1, 3),
     ('Brumm', 'Make a smooth shadow, friend.', 'https://shadows.brumm.af/', 'active', 1, 3),
-    ('React', 'JavaScript framework :)', 'https://reactjs.org/', 'active', 1, 3),
+    ('React', 'A JavaScript library for building user interfaces', 'https://reactjs.org/', 'active', 1, 3),
     ('Strapi', 'Strapi is the leading open-source headless CMS.', 'https://strapi.io/', 'active', 1, 4),
     ('Huggingface: Datasets', 'Datasets is a library for easily accessing and sharing datasets.', 'https://huggingface.co/docs/datasets/', 'active', 1, 4),
     ('Lucidchart', 'Lucidchart is the intelligent diagramming application that brings teams together.', 'https://www.lucidchart.com/pages/', 'active', 1, 4),

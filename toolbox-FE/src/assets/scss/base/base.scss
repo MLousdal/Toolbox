@@ -1,0 +1,17 @@
+@use "../base/variables" as *;
+
+* {
+    box-sizing: border-box;
+    &::before,
+    &::after {
+        box-sizing: inherit;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body{
+    background-color: var(--background-color);
+}

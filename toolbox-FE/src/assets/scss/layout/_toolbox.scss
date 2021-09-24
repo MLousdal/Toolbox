@@ -1,50 +1,26 @@
 @use "../base/variables" as *;
 
-
 .toolbox {
-  padding-block: min(10vh, #{$spacing-l});
-  display: flex; 
+  display: flex;
   flex-direction: column;
-  flex-wrap: no-wrap;
   justify-content: flex-start;
-  gap: $spacing-xs;
-  
+  gap: $unit-05;
+  padding-bottom: $unit-2;
+
   input[type="radio"] {
     display: none;
   }
 }
 
-  .tools {
-    display: none;
-    width: 100%;
-    grid-template-columns: repeat(3, 1fr);
-    gap: $spacing-s;
-    order: 1;
-    
-    .tool {
-      display: flex;
-      flex-direction: column;
-      background-color: var(--foreground-color);
-      padding: $spacing-m;
-      border-radius: $border-radius;
-      max-width: 25em;
-      border: 1px solid var(--font-color);
-
-      p {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-      }
-      
-      a {
-        margin-top: auto;
-      }
-    }
+.tools {
+  display: none;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $unit-1;
+  order: 1;
 
   input[type="radio"]:checked + label {
-    background-color: var(--color-primary);
+    // background-color: var(--color-primary);
   }
 
   input[type="radio"]:checked + label + .tools {

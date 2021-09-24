@@ -1,93 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Toolbox</title>
-    <meta
-      name="description"
-      content="The place to find the webtools for your web need, when creating your amazing websites!"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1 minimum-scale=1"
-    />
-    <link rel="stylesheet" href="assets/scss/main.scss" />
-    <link
-      rel="icon"
-      type="image/png"
-      href="assets/images/favicon-32x32.png"
-      sizes="32x32"
-    />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Toolbox | my page</title>
+    <meta name="description" content="The place to find the webtools for your web need, when creating your amazing websites!">
+    <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
+    <link rel="stylesheet" href="assets/scss/main.scss">
+    <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32" />
     <script src="assets/js/index.js" defer="true" type="module"></script>
   </head>
-  <body class="theme-light">
+  <body class="sectionGap">
     <nav>
       <a href="index.html">
-        <img src="assets/images/logo.png" alt="logo" class="nav-logo" />
+          <img src="assets/images/logo.png" alt="logo" class="nav-logo">
       </a>
       <ul id="nav-links">
-        <li><a href="mypage.html" class="underline">my page</a></li>
-        <li><a href="forms.html" class="underline">login / signup</a></li>
+          <li><a href="mypage.html" class="hide"></a></li>
+          <li><a href="forms.html" class="underline">login / signup</a></li>
       </ul>
     </nav>
-    <main class="wrapper myPage">
-      <section class="box" id="myTools">
-        <h2>[user's] page</h2>
-          <section>
-            <h3>Submitted tools:</h3>
-            <div class="tools">
-              <div class="toolOptions">
-                <article class="tool">
-                  <h4>Google fonts</h4>
-                  <p>Google fonts is for finding fonts for your project that requires fontsGoogle fonts is for finding fonts for your project that requires fonts</p>
-                  <a href="#">visit tool..</a>
-                </article>
-                <div class="options">
-                  <button class="update btn">update</button>
-                  <button class="delete btn">delete</button>
-                </div>
-                <button class="optionsBtn">&#10247;</button>
-              </div>
-              <div class="toolOptions">
-                <article class="tool">
-                  <h4>AKAR ICONS</h4>
-                  <p>Perfectly rounded icon library made for designers and developers</p>
-                  <a href="#">visit tool..</a>
-                </article>
-                <div class="options">
-                  <button class="update btn">update</button>
-                  <button class="delete btn">delete</button>
-                </div>
-                <button class="optionsBtn">&#10247;</button>
-              </div>
-            </div>
-          </section>
-      </section>
-      <section class="myPageForms">
-        <form id="submitTool">
-          <h3>Submit a new tool:</h3>
-          <label for="Stitel">title: 
-            <input type="text" id="Stitel" name="Stitel" required>
-          </label>
-          <label for="Sdesc">description:
-            <textarea id="Sdesc" name="Sdesc" rows="3" required></textarea>
-          </label>
-          <label for="Slink">link: 
-            <input type="text" id="Slink" name="Slink" required>
-          </label>
-          <label for="Scategory">category: 
-            <select name="Scategory" id="Scategory" required>
-              <option value="">--Please choose a category --</option>
-              <option value="design">Design</option>
-              <option value="UX">UX</option>
-              <option value="frontend">frontend</option>
-              <option value="backend">backend</option>
-          </select>
-          </label>
-          <button class="btn active" id="SnewTool">submit</button>
-        </form>
-      </section>
+    <main class="wrapper" id="myPage">
     </main>
-  </body>
+  </body> 
 </html>

@@ -1,0 +1,40 @@
+@use "../base/variables" as *;
+
+.optionsBtn {
+  cursor: pointer;
+  position: absolute;
+  top: $unit-1;
+  right: $unit-1;
+
+  &.icon {
+    filter: var(--filter-font-color);
+
+    &:hover,
+    &:focus {
+      filter: var(--filter-primary);
+    }
+  }
+}
+
+.options {
+  display: none;
+  position: absolute;
+  top: $unit-05;
+  right: calc(#{$unit-2} + #{$unit-05});
+  z-index: 2;
+  flex-direction: column;
+  gap: $unit-1;
+  padding: $unit-1;
+  background-color: var(--foreground-color);
+  border: 1px solid var(--font-color);
+  border-radius: $border-radius;
+
+  .update {
+    background-color: $success-color;
+    color: $success-font-color;
+  }
+  .delete {
+    background-color: $error-color;
+    color: $error-font-color;
+  }
+}
