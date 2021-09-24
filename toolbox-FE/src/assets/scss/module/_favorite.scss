@@ -1,0 +1,16 @@
+@use "../base/variables" as *;
+
+.favorite, .unfavorite {
+  position: absolute;
+  top: $unit-1;
+  right: $unit-1;
+  border: none;
+  
+  &.icon {
+    filter: var(--filter-font-color);
+    
+    &:hover, &:focus {
+      filter: var(--filter-primary);
+    }
+  }
+}

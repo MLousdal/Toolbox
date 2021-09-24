@@ -1,0 +1,67 @@
+@use "../base/variables" as *;
+
+.loading {
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+  &::after {
+    animation: loading 500ms infinite linear;
+    background: transparent;
+    border: $border-width-thick solid;
+    border-radius: $border-radius-o;
+    border-left-color: var(--font-color);
+    border-bottom-color: var(--font-color);
+    border-right-color: transparent;
+    border-top-color: transparent;
+    content: "";
+    display: block;
+    height: $unit-1;
+    left: 50%;
+    margin-left: -#{$unit-05};
+    margin-top: -#{$unit-05};
+    opacity: 1;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    width: $unit-1;
+  }
+
+  &.btn-success::after,
+  &.btn-error::after,
+  &.btn-warning::after {
+    border-left-color: $neutral-0;
+    border-bottom-color: $neutral-0;
+  }
+
+  &.loading-lg {
+    &::after {
+      height: $unit-2;
+      margin-left: -$unit-1;
+      margin-top: -$unit-1;
+      width: $unit-2;
+    }
+  }
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.underline {
+  padding-bottom: 2px;
+  background: linear-gradient(var(--color-primary), var(--color-primary)) bottom;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition: all 0.45s;
+
+  &:hover,
+  &:focus {
+    background-size: 50% 2px;
+    outline: none;
+  }
+}

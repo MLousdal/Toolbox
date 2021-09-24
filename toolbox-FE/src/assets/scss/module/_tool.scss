@@ -1,0 +1,30 @@
+@use "../base/variables" as *;
+
+.tool {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--foreground-color);
+  padding: $unit-15;
+  border-radius: $border-radius;
+  width: 100%;
+  border: 1px solid var(--font-color);
+
+  h5 {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  a {
+    margin-top: auto;
+  }
+}

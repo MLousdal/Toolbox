@@ -46,14 +46,15 @@ adminAuth = [auth, auth_admin],
 // /api/tools/delete/:me/:toolId
 // /api/tools/delete/:toolID
 
-            // *************************
-            // ******** TIPS ***********
-            // *************************
-            // How to order routes? Reference: https://gabrieleromanato.name/order-of-routes-when-using-parameters-in-expressjs
-            // It sould be from least specific to most specific, like so:
-            // router.get('/)
-            // router.get('/tools)
-            // router.get('/:toolId)
+// *************************
+// ******** TIPS ***********
+// *************************
+// How to order routes? Reference: https://gabrieleromanato.name/order-of-routes-when-using-parameters-in-expressjs
+// It sould be from least specific to most specific, like so:
+// router.get('/)
+// router.get('/tools)
+// router.get('/:toolId)
+
 
 // ---------------------------------------------------------
 
@@ -137,7 +138,7 @@ router.get('/creator/:userid', memberPlus, async (req, res, next) => {
     // What is needed:
         // Expected req.body:
             // {
-            //     userId: '', -- The creater of the tool
+            //     userId: '', -- The creator of the tool
             //     toolTitle: '',
             //     toolDescription: '',
             //     toolLink: '',
@@ -235,7 +236,6 @@ router.put('/:userid/:toolid', memberPlus, async (req, res, next) => {
         next(err);
     }
 });
-
 
 // This router is for:
     // Authorization: Admin

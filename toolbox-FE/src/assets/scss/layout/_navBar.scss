@@ -6,7 +6,7 @@ nav {
     display: flex;
     text-align: center;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
     z-index: 5;
     background-color: var(--foreground-color);
@@ -18,7 +18,8 @@ nav {
     li {
         display: inline-flex;
         justify-content: space-evenly;
-        padding: $spacing-s;
+        padding: $unit-1;
+        margin: 0;
     }
 
     a {
@@ -26,21 +27,30 @@ nav {
         text-decoration: none;
         color: inherit;
         border-radius: var(--border-radius);
+
+        &:hover, &:focus {
+            text-decoration: none;
+        }
     }
     
+    #nav-links {
+        margin-left: auto;
+    }
+
     .active {
         font-weight: 700;
     }
     
     .nav-logo {
         vertical-align: bottom;
-        width: $spacing-m;
-        height: $spacing-m;
-        margin: $spacing-s $spacing-s;
+        width: $unit-2;
+        height: $unit-2;
+        margin: $unit-1 $unit-1;
+        filter: var(--filter-primary);
     }
-
+    
     .nav-logo:hover, .nav-logo:focus {
-        filter: var(--filter);
+        filter: var(--filter-primary-dark);
     }
 
 }

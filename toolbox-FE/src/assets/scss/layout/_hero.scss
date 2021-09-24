@@ -4,11 +4,11 @@
     display: flex;
     justify-content: space-between;
     flex-direction: row;
-    gap: $spacing-l;
-    padding-block: min(10vh, #{$spacing-l});
+    gap: $unit-4;
     align-items: center;
 
     img {
+        padding-block: min(10vh, #{$unit-4}); 
         width: 100%;
         max-width: 30rem;
     }
@@ -18,12 +18,12 @@
     .hero {
         flex-direction: column-reverse;
         text-align: center;
-        gap: $spacing-m;
+        gap: $unit-2;
     }
 }
 
 @media (max-width: 650px) {
     .hero {
-        gap: $spacing-s;
+        gap: $unit-1;
     }
   }
