@@ -134,16 +134,24 @@ function removeSkeletons() {
 // favorite button
 function favoriteBtn() {
   let allfavoriteBtn = document.querySelectorAll(".favorite");
-  const userData = localStorage.getItem("userData");
-  const userId = JSON.parse(userData).userId;
-  console.log(userId);
+
+  if (token) { 
+    userData = localStorage.getItem("userData");
+    userId = JSON.parse(userData).userId;
+  }
+
+  if (!token) {
+    allfavoriteBtn.forEach((btn) => {
+      btn.classList.add("hide");
+    });
+  }
 
   allfavoriteBtn.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       controller = new AbortController();
       signal = controller.signal;
 
-      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+      const toolToolId = e.target.parentElement.dataset.id;
 
       const data = {
         toolId: toolToolId,
@@ -160,13 +168,16 @@ function favoriteBtn() {
       })
         .then((response) => {
           if (response.status == 409) {
-            console.log("already a favorite");
+            document.querySelector(".notifications").innerHTML = `<span class="notification box background-error">Already a favorite</span>`;
+            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
             controller.abort();
           }
           return response.json();
         })
         .then((data) => {
-          console.log("Added: " + data + "to favorites");
+          document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully added from favorites</span>`;
+          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+          favoriteBtn()
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -183,37 +194,33 @@ function unfavoriteBtn() {
 
   allUnfavoriteBtn.forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+      controller = new AbortController();
+      signal = controller.signal;
+      const toolToolId = e.target.parentElement.dataset.id;
 
-      console.log("unfavorited: " + toolToolId);
-
-      const data = {
-        toolId: toolToolId,
-        userId: userId,
-      };
-      // fetch delete ready :D
-
-      //   fetch(url + toolsEndpoint + favoritEndpoint, {
-      //     method: "DELETE",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(data),
-      //     signal: controller.signal
-      //   })
-      //     .then((response) => {
-      //       if (response.status == 409) {
-      //         console.log("already a favorite")
-      //         controller.abort();
-      //       }
-      //       return response.json();
-      //     })
-      //     .then((data) => {
-      //       console.log("Added: " + data + "to favorites");
-      //     })
-      //     .catch((error) => {
-      //       console.error("Error:", error);
-      //     });
+        fetch(url + toolsEndpoint + "/" + userId + "/" + toolToolId, {
+          method: "delete",
+          headers: {
+            "Content-Type": "application/json",
+            "toolbox-token": localStorage.getItem("toolbox-token")
+          },
+          signal: controller.signal
+        })
+          .then((response) => {
+            if (response.status == 409) {
+              controller.abort();
+            }
+            return response.json();
+          })
+          .then((data) => {
+            e.target.parentElement.remove();
+            document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
+            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+            unfavoriteBtn()
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     });
   });
 }
@@ -306,6 +313,7 @@ if (forms) {
     };
 
     const Loutput = document.querySelector("#Loutput");
+    loginForm.querySelector(".btn").classList.add("loading");
 
     fetch(url + loginEndpoint, {
       method: "POST",
@@ -317,10 +325,12 @@ if (forms) {
     })
       .then((response) => {
         if (response.status !== 200) {
-          Loutput.innerHTML = `
-          <span>ERROR: email or password is incorrect</span>
+          document.querySelector(".notifications").innerHTML = `
+          <span class="notification box background-error">email or password is incorrect</span>
           `;
+          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
           controller.abort();
+          loginForm.querySelector(".btn").classList.remove("loading");
         }
         const toolboxToken = response.headers.get("toolbox-token");
         localStorage.setItem("toolbox-token", toolboxToken);
@@ -329,6 +339,7 @@ if (forms) {
       .then((data) => {
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
+        loginForm.querySelector(".btn").classList.remove("loading");
         window.location.href = "http://localhost:1234/index.html";
       })
       .catch((error) => {
@@ -350,7 +361,6 @@ if (forms) {
       userPassword: SUpassword.value,
     };
 
-    const SUoutput = document.querySelector("#SUoutput");
     fetch(url + signupEndpoint, {
       method: "POST",
       headers: {
@@ -361,10 +371,11 @@ if (forms) {
     })
       .then((response) => {
         if (response.status !== 200) {
-          SUoutput.innerHTML = `
-        <span>ERROR: Account not created</span>
+          document.querySelector(".notifications").innerHTML = `
+        <span class="notification box background-error">ERROR: Account not created</span>
         `;
-          controller.abort();
+        setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+        controller.abort();
         }
         return response.json();
       })
@@ -645,10 +656,6 @@ if (myPageMain) {
               toolCategoryId: toolCategoryId,
             };
 
-            if (!pattern.test(toolLink)) {
-              submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
-              break;
-            }
             console.log(url + toolsEndpoint + userId + "/" + toolToolId);
 
             fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
