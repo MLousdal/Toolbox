@@ -40,7 +40,6 @@ adminAuth = [auth, auth_admin],
 
 //          POST /api/Users (SIGNUP)
 router.post('/', async (req, res, next) => {
-    
     try {
         // previously Login.validate(req.body)
         const { error } = User.validateResponse(req.body);
@@ -64,10 +63,10 @@ router.post('/', async (req, res, next) => {
 
 //          POST /api/Users/login (LOGIN)
 router.post('/login', async (req, res, next) => {
-
-    console.log("ROUTER req.body: ", req.user)
     //Allows a "custom token" to be used.
     res.setHeader('Access-Control-Expose-Headers', 'toolbox-token');
+    // Exposes a non-CORS-safelisted response (So we add toolbox-token to the list of safe headers), so we can use our custom token in the browser. Read more: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
+    // CORS(Cross-Origin Resourse Sharing). Read more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 
     try {
         // Is the data from the FE login, correctly formated?
@@ -86,15 +85,6 @@ router.post('/login', async (req, res, next) => {
         return res.send(JSON.stringify(user));
     } catch (err) {
         next(err);
-        console.log(err);
-
-        // ***************************************************
-        // ******************** CHECK ************************
-        // ***************************************************
-        // need to make the condition check sensible...
-        // if (!err.statusCode) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
-        // if (err.statusCode != 400) return res.status(401).send(JSON.stringify({ errorMessage: 'Incorrect user email or password.' }));
-        // return res.status(400).send(JSON.stringify({ errorMessage: err.errorMessage.details[0].message }));
     }
 });
 
@@ -143,21 +133,19 @@ router.get('/:userid', async (req, res, next) => {
     }
 });
 
+// // ********************************************************
+// // ********************  TEST ROUTE  **********************
+// // ********************************************************
+// router.get('/test/test', [auth], async (req,res, next) => {
+//     try {
+//         // const user = await User.test1();
+//         // return res.send(JSON.stringify(user));
 
-// ********************************************************
-// ********************  TEST ROUTE  **********************
-// ********************************************************
-router.get('/test/test', [auth], async (req,res, next) => {
-    try {
-        // const user = await User.test1();
-        // return res.send(JSON.stringify(user));
 
-
-        console.log("Test running!")
-    } catch (err) {
-        next(err);
-    }
-})
-
+//         console.log("Test running!")
+//     } catch (err) {
+//         next(err);
+//     }
+// })
 
 module.exports = router;
