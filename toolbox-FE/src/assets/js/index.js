@@ -5,6 +5,7 @@ const signupEndpoint = "users/";
 const toolsEndpoint = "tools/";
 const favoritEndpoint = "favorite/";
 const deleteEndpoint = "delete/";
+const creatorEndpoint = "creator/";
 
 const notifications = document.querySelector(".notifications");
 
@@ -165,6 +166,7 @@ function favoriteBtn() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "toolbox-token": localStorage.getItem("toolbox-token"),
         },
         body: JSON.stringify(data),
         signal: controller.signal,
@@ -328,6 +330,7 @@ if (forms) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
       },
       body: JSON.stringify(data),
       signal: controller.signal,
@@ -376,6 +379,7 @@ if (forms) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
       },
       body: JSON.stringify(data),
       signal: controller.signal,
@@ -410,14 +414,14 @@ const myPageMain = document.querySelector("#myPage");
 let toolOptionsArr = [];
 
 function toolOptions() {
-  toolOptionsArr = document.querySelectorAll(".tool");
+  toolOptionsArr = document.querySelectorAll(".tool.withOptions");
 
   if (toolOptionsArr.length > 0) {
     toolOptionsArr.forEach((tool) => {
       const options = tool.querySelector(".options");
       const optionsBtn = tool.querySelector(".optionsBtn");
-      const updateBtn = options.children[0];
-      const deleteBtn = options.children[1];
+      const updateBtn = tool.querySelector(".update");
+      const deleteBtn = tool.querySelector(".delete");
 
       const myPageForms = document.querySelector(".myPageForms");
 
@@ -468,13 +472,13 @@ function toolOptions() {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
+                  "toolbox-token": localStorage.getItem("toolbox-token"),
                 },
               })
                 .then((response) => {
                   return response.json();
                 })
                 .then((data) => {
-                  console.log(data);
                   options.classList.toggle("flex");
                   deleteBtn.classList.remove("loading");
                   tool.remove();
@@ -498,7 +502,6 @@ function toolOptions() {
     });
   }
 }
-
 
 function myPageBtnContainer() {
   const btnContainer = document.querySelector(".btn-container");
@@ -599,7 +602,7 @@ if (myPageMain) {
     </section>
   </section>
   `;
-  };
+  }
 
   const myPageSubmit = `
   <section class="myPageForms">
@@ -644,13 +647,13 @@ if (myPageMain) {
         removeSkeletons();
         data.forEach((tool) => {
           const toolHTML = `
-          <article class="tool" data-toolID="${tool.toolId}">
+          <article class="tool withOptions" data-toolID="${tool.toolId}">
               <h5>${tool.toolTitle}</h5>
               <p>${tool.toolDescription}</p>
               <a href="${tool.toolLink}" target="_blank">visit tool..</a>
               <div class="options">
-                <button class="update btn">update</button>
-                <button class="delete btn">delete</button>
+                <button class="update">update</button>
+                <button class="delete">delete</button>
               </div>
               <input type="image" alt="" src="menu.svg" class="optionsBtn icon" />
           </article>
@@ -671,6 +674,10 @@ if (myPageMain) {
   if (userRole == 2) {
     fetch(url + toolsEndpoint + favoritEndpoint + userId, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
+      },
     })
       .then((response) => {
         return response.json();
@@ -697,7 +704,45 @@ if (myPageMain) {
       `;
       });
   }
-  myPageBtnContainer()
+
+  const myToolsSec = document.querySelector(".myToolsSec");
+  fetch(url + toolsEndpoint + creatorEndpoint + userId, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "toolbox-token": localStorage.getItem("toolbox-token"),
+    },
+  })
+    .then((response) => {
+      if (response.status == 400) {
+        myToolsSec.innerHTML = `
+        <span class="flex center-flex">You haven't submitted any tools</span>
+        `;
+      }
+      return response.json();
+    })
+    .then((data) => {
+      data.forEach((tool) => {
+        const toolHTML = `
+        <article class="tool withOptions" data-toolID="${tool.toolId}">
+            <h5>${tool.toolTitle}</h5>
+            <p>${tool.toolDescription}</p>
+            <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            <div class="options">
+              <button class="update">update</button>
+            </div>
+            <input type="image" alt="" src="menu.svg" class="optionsBtn icon" />
+        </article>
+        `;
+        myToolsSec.innerHTML += toolHTML;
+      });
+      toolOptions();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
+  myPageBtnContainer();
 
   // AllmyPageForms
   function updateAllmyPageForms() {
@@ -732,6 +777,7 @@ if (myPageMain) {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "toolbox-token": localStorage.getItem("toolbox-token"),
               },
               body: JSON.stringify(postData),
             })
@@ -739,17 +785,22 @@ if (myPageMain) {
                 return response.json();
               })
               .then((data) => {
-                console.log(data);
                 submitTool.querySelector(".btn").classList.remove("loading");
-                submitTool.innerHTML += `
-                <span class="text-success text center">Successfully added tool to toolbox!</span>
+                notifications.innerHTML += `
+                <span class="background-success text center box notification">Successfully added tool to toolbox!</span>
                 `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               })
               .catch((error) => {
                 console.error("Error:", error);
-                submitTool.innerHTML += `
-                <span class="text-error text center">Couldn't add tool to toolbox</span>
+                notifications.innerHTML += `
+                <span class="background-error text center box notification">Couldn't add tool to toolbox</span>
                 `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               });
             break;
           case updateTool:
@@ -760,12 +811,11 @@ if (myPageMain) {
               toolCategoryId: toolCategoryId,
             };
 
-            console.log(url + toolsEndpoint + userId + "/" + toolToolId);
-
             fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
+                "toolbox-token": localStorage.getItem("toolbox-token"),
               },
               body: JSON.stringify(updateData),
             })
@@ -773,7 +823,12 @@ if (myPageMain) {
                 return response.json();
               })
               .then((data) => {
-                console.log(data);
+                notifications.innerHTML += `
+                <span class="background-success text center box notification">Successfully updated tool to toolbox!</span>
+                `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               })
               .catch((error) => {
                 console.error("Error:", error);

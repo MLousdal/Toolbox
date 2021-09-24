@@ -12,9 +12,13 @@
     padding: $unit-2;
     margin-bottom: $unit-4;
     
-    .tools {
+    .tools, .myToolsSec {
       display: flex;
       flex-direction: column;
+    }
+
+    .myToolsSec {
+      display: none;
     }
 
     .tool {
