@@ -1,3 +1,4 @@
+const { application } = require('express');
 const { required } = require('joi');
 
 const 
@@ -44,10 +45,16 @@ adminAuth = [auth, auth_admin],
 // /api/tools/delete/:me/:toolId
 // /api/tools/delete/:toolID
 
+            // *************************
+            // ******** TIPS ***********
+            // *************************
+// How to order routes? Reference: https://gabrieleromanato.name/order-of-routes-when-using-parameters-in-expressjs
+// It sould be from least specific to most specific, like so:
+// router.get('/)
+// router.get('/tools)
+// router.get('/:toolId)
 
 // ---------------------------------------------------------
-
-
 
 //------------------------GET-------------------------------
 
@@ -153,7 +160,7 @@ router.post('/favorite', async (req, res, next) => {
     }
 });
 //------------------------------------------------------------------------------------------
-//------------------------------------ PUT  ALL TYPES --------------------------------------
+//------------------------------------ PUT ALL TYPES ---------------------------------------
 //------------------------------------------------------------------------------------------
 
 //------------------------------------ PUT(SOFT-DELETE) ------------------------------------

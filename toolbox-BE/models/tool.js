@@ -326,6 +326,7 @@ class Tool {
     }
     
     update() {
+        // Should be used for when a member want to change one of the tools created by that specific member!
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
@@ -343,7 +344,7 @@ class Tool {
                             EXISTS (
                                 SELECT *
                                 FROM toolboxTool t
-                                WHERE t.toolId = @toolId
+                                WHERE t.toolId = @toolId AND t.FK_userId = @userId
                             ))
                         BEGIN
                             UPDATE toolboxTool
