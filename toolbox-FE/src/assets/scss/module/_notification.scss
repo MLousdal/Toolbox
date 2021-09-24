@@ -1,0 +1,11 @@
+@use "../base/variables" as *;
+
+.notification {
+  padding: $unit-1;
+  position: absolute;
+  top: $unit-5;
+  left: 50%;
+  transform: translatex(-50%);
+  width: fit-content;
+  
+}

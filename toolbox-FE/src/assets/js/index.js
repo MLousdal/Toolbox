@@ -192,37 +192,34 @@ function unfavoriteBtn() {
 
   allUnfavoriteBtn.forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      const toolToolId = e.target.parentElement.parentElement.dataset.id;
+      controller = new AbortController();
+      signal = controller.signal;
+      const toolToolId = e.target.parentElement.dataset.id;
 
-      console.log("unfavorited: " + toolToolId);
-
-      const data = {
-        toolId: toolToolId,
-        userId: userId,
-      };
-      // fetch delete ready :D
-
-      //   fetch(url + toolsEndpoint + favoritEndpoint, {
-      //     method: "DELETE",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(data),
-      //     signal: controller.signal
-      //   })
-      //     .then((response) => {
-      //       if (response.status == 409) {
-      //         console.log("already a favorite")
-      //         controller.abort();
-      //       }
-      //       return response.json();
-      //     })
-      //     .then((data) => {
-      //       console.log("Added: " + data + "to favorites");
-      //     })
-      //     .catch((error) => {
-      //       console.error("Error:", error);
-      //     });
+        fetch(url + toolsEndpoint + "/" + userId + "/" + toolToolId, {
+          method: "delete",
+          headers: {
+            "Content-Type": "application/json",
+            "toolbox-token": localStorage.getItem("toolbox-token")
+          },
+          signal: controller.signal
+        })
+          .then((response) => {
+            if (response.status == 409) {
+              console.log("already a favorite")
+              controller.abort();
+            }
+            return response.json();
+          })
+          .then((data) => {
+            e.target.parentElement.remove();
+            console.log("Removed: " + data + "from favorites");
+            document.querySelector("body").innerHTML += `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
+            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     });
   });
 }
