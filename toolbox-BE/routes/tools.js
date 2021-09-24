@@ -29,8 +29,9 @@ adminAuth = [auth, auth_admin],
 
 // GET
 // /api/tools -- All tools
-// /api/tools/:toolID -- Specific tool
+// /api/tools/:toolId -- Specific tool
 // /api/tools/favorite/:me -- All favoritet tools from a specific user
+// /api/tools/creator/:userId -- All tools that a user have created.
 
 
 // POST
@@ -69,7 +70,7 @@ router.get('/', async (req, res,next) => {
 });
 
 //  GET /api/tools/favorite/:me  (Get all tools that a user has as favorites)
-router.get('/favorite/:me', async (req, res, next) => {
+router.get('/favorite/:me', memberPlus, async (req, res, next) => {
     let me;
     try {
         if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
@@ -85,9 +86,8 @@ router.get('/favorite/:me', async (req, res, next) => {
     }
 });
 
-
-//        GET api/tools/:toolID (Specific tool)
-router.get('/:toolid', async (req, res, next) => {
+//  GET api/tools/:toolid (GET a Specific tool) 
+router.get('/:toolid', adminAuth, async (req, res, next) => {
     // same as users/:userid
     let toolid;
     try {
@@ -102,20 +102,39 @@ router.get('/:toolid', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+});
 
+//  GET api/tools/creator/:userId -- Will get all Tools an User have created.
+router.get('/creator/:userid', memberPlus, async (req, res, next) => {
+    // same as users/:userid
+    let userId;
     try {
-        const tool = await Tool.readByAll(req.params.toolid);
+        if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
+            userId = parseInt(req.params.userid);
+        }
+        if (!userId) throw new TakeError(400, 'Bad request: user = should refer an users id (integer)');
+
+        const user = {
+            creator: true,
+            creatorId: userId
+        }
+        // Validate our new object:
+        const { error} = Tool.validate_creator(user);
+        if (error) throw new TakeError(400, 'Bad request: req.params formatted incorrectly');
+
+        const tool = await Tool.readAll(user);
         return res.send(JSON.stringify(tool));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
 
 //------------------------POST-------------------------------
 
-//          POST /api/tools (userId, title, description, link, categoryId)
-router.post('/', async (req, res, next) => {
-    try {
+// This router is for:
+    // Authorization: Member+ = Member + Admin
+    // -- If a user want to create a new tool
+    // What is needed:
         // Expected req.body:
             // {
             //     userId: '', -- The creater of the tool
@@ -124,6 +143,8 @@ router.post('/', async (req, res, next) => {
             //     toolLink: '',
             //     toolCategoryId: ''
             // }
+router.post('/', memberPlus, async (req, res, next) => {
+    try {
         const { error } = Tool.validate_tool(req.body);
         if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
 
@@ -138,14 +159,18 @@ router.post('/', async (req, res, next) => {
         next(err);
     }
 });
-router.post('/favorite', async (req, res, next) => {
-    try {
-        // Expected req.body:
+
+// This router is for:
+    // Authorization: Member+ = Member + Admin
+    // -- If a user want to add a tool to their Favorites
+    // What is needed:
+       // Expected req.body:
             // {
             //     toolId: '',
             //     userId: ''
             // }
- 
+router.post('/favorite', memberPlus, async (req, res, next) => {
+    try { 
         const { error } = Favorite.validate(req.body);
         if (error) throw new TakeError(400, 'Bad request: Favorite payload formatted incorrectly');
 
@@ -159,38 +184,16 @@ router.post('/favorite', async (req, res, next) => {
         next(err);
     }
 });
-//------------------------------------------------------------------------------------------
-//------------------------------------ PUT ALL TYPES ---------------------------------------
-//------------------------------------------------------------------------------------------
 
-//------------------------------------ PUT(SOFT-DELETE) ------------------------------------
-// This router is for:
-    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)!
-    // What is needed:
-        // In the path:
-        // -- /delete/ follow by the id of the tool that should be "removed"!.
-        router.put('/delete/:toolid', async (req, res, next) => {
-            let toolId; // Used to check if we have correct req.params.
-            try {
-                if (req.params.toolid) toolId = parseInt(req.params.toolid);
-                if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
-        
-                const deactivatTool = await Tool.soft_delete(toolId);
-        
-                return res.send(JSON.stringify(deactivatTool));
-            } catch(err) {
-                next(err);
-            }
-        });
+//------------------------ PUT -------------------------------
 
 // This router is for:
+    // Authorization: Member+ = Member + Admin
     // -- If a user want to UPDATE a tools data!
     // What is needed:
         // In the path:
-        // -- .
-router.put('/:userid/:toolid', async (req, res, next) => { // -- Member+ ?
-    let toolId, userId;
-    try {
+        // -- :userId - needs to be the creature of the tool.
+        // -- :toolId - is for the tool that should be UPDATEed.
         // Expected req.body:
             // {
             //     toolTitle: '',
@@ -198,7 +201,10 @@ router.put('/:userid/:toolid', async (req, res, next) => { // -- Member+ ?
             //     toolLink: '',
             //     toolCategoryId: ''
             // }
-            // Add the userId, and toolId from req.params
+router.put('/:userid/:toolid', memberPlus, async (req, res, next) => {
+    let toolId, userId;
+    try {
+        // Add the userId, and toolId from req.params
         if (req.params.userid) { 
             userId = parseInt(req.params.userid);
             req.body.userId = userId;
@@ -231,34 +237,73 @@ router.put('/:userid/:toolid', async (req, res, next) => { // -- Member+ ?
 });
 
 
-//          PUT /api/tools/:toolID
-
-router.put('/:toolid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
-
-    const toolidValidate = Tool.validate(req.params);
-    if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-    const payloadValidate = Tool.validate(req.body);
-    if (payloadValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: Tool payload formatted incorrectly', errorDetail: error.details[0].message }));
-
+// This router is for:
+    // Authorization: Admin
+    // -- If a Admin want to UPDATE ANY tools data!
+    // What is needed:
+        // In the path:
+        // -- :toolId - is for the tool that should be UPDATEed.
+router.put('/:toolid', adminAuth,  async (req, res, next) => { 
+    let toolId;
     try {
-        const oldTool = await Tool.readById(req.params.toolid);
-        oldTool.copy(req.body);
-        const tool = await oldTool.update();
+        // Expected req.body:
+            // {
+            //     toolTitle: '',
+            //     toolDescription: '',
+            //     toolLink: '',
+            //     toolCategoryId: ''
+            // }
+            // Add the toolId from req.params
+
+        if (req.params.toolid) {
+            toolId = parseInt(req.params.toolid);
+            // Add our toolId to our req.body for use in Tool.
+            req.body.toolId = toolId;
+        }
+        if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+
+        const 
+        { error } = Tool.validate_tool(req.body);
+        if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
+
+        const 
+        // Update a Tool from the req.body, 
+        // -- and use the .update() to UPDATE DB(If everything checks out)
+        updatedTool = new Tool(req.body),
+        tool = await updatedTool.update_admin();
+        
         return res.send(JSON.stringify(tool));
     } catch (err) {
-        return res.status(500).send(JSON.stringify({ errorMessage: err }));
+        next(err);
     }
 });
 
 // ---------------------------------------- DELETE ------------------------------------------
 
 // This router is for:
+    // Authorization: Admin
+    // -- If a user want to "remove" a Tool (Will change the toolStatus = inactive)
+    // -- If a user want to "show" a Tool (Will change the toolStatus = active)
+    // What is needed:
+        // In the path:
+        // -- /delete/ follow by the id of the tool that should be "removed"!.
+router.delete('/delete/:toolid', adminAuth, async (req, res, next) => {
+    // .delete is used, but in the DB a status is just changed from active/inactive to the opposite.
+    let toolId; // Used to check if we have correct req.params.
+    try {
+        if (req.params.toolid) toolId = parseInt(req.params.toolid);
+        if (!toolId) throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+
+        const deactivatTool = await Tool.soft_delete(toolId);
+
+        return res.send(JSON.stringify(deactivatTool));
+    } catch(err) {
+        next(err);
+    }
+});
+
+// This router is for:
+    // Authorization: Member+ = Member + Admin
     // -- If a user want to remove a Tool from it's favorite list!
     // What is needed:
         // In the path:

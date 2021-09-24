@@ -11,8 +11,8 @@ con = config.get('dbConfig_UCN'),
 
 class Tool {
     constructor(toolObj) {
-        this.userId = toolObj.userId;
-        if (toolObj.toolId) this.toolId = toolObj.toolId;
+        if (toolObj.userId) this.userId = toolObj.userId; // Only if it exist in our toolObj.
+        if (toolObj.toolId) this.toolId = toolObj.toolId; // Only if it exist in our toolObj.
         this.toolTitle = toolObj.toolTitle;
         this.toolLink = toolObj.toolLink;
         this.toolDescription = toolObj.toolDescription;
@@ -52,6 +52,10 @@ class Tool {
                 .min(1)
                 .max(255)
                 .required(),
+            toolStatus: Joi
+                .string()
+                .min(1)
+                .max(50),
             category: Joi.object({
                 categoryId: Joi
                     .number()
@@ -103,7 +107,22 @@ class Tool {
         return schema.validate(newToolObj);
     }
 
-    static readAll(toolId) {
+    static validate_creator (creatorObj) {
+        const schema = Joi.object({
+            creator: Joi
+                .boolean()
+                .required(),
+            creatorId: Joi
+                .number()
+                .integer()
+                .min(1)
+                .required()
+        })
+
+        return schema.validate(creatorObj);
+    }
+
+    static readAll(readObj) {
         return new Promise((resolve, reject) => {
             (async () => {
                   // › › connect to DB
@@ -118,16 +137,32 @@ class Tool {
                     const pool = await sql.connect(con);
                     let result;
 
-                    if (toolId) {
-                        result = await pool.request()
-                            .input('toolId', sql.Int(), toolId)
-                            .query(`
-                                SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
-                                FROM toolboxTool t 
-                                JOIN toolboxCategory c
-                                    ON t.FK_categoryId = c.categoryId
-                                WHERE t.toolId = @toolId AND t.toolStatus = 'active'
-                            `);
+                    // First if statement are look if readObj is in anyway true (having a value of some kind = true)
+                    // -- If readObj = true, look if readObj.creator = true (Is readObj an object, then we know to look for all Tools from a specific user)
+                        // -- If not then that means we are look for a specific tool and ORDER BY caregory.
+                    // If readObj = false, then we just need to find all tools that are active.
+                    if (readObj) {
+                        if (readObj.creator == true) {
+                            result = await pool.request()
+                                .input('userId', sql.Int(), readObj.creatorId)
+                                .query(`
+                                    SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                                    FROM toolboxTool t 
+                                    JOIN toolboxCategory c
+                                        ON t.FK_categoryId = c.categoryId
+                                    WHERE t.FK_userId = @userId AND t.toolStatus = 'active'
+                                `);
+                        } else {
+                            result = await pool.request()
+                                .input('toolId', sql.Int(), readObj)
+                                .query(`
+                                    SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                                    FROM toolboxTool t 
+                                    JOIN toolboxCategory c
+                                        ON t.FK_categoryId = c.categoryId
+                                    WHERE t.toolId = @toolId AND t.toolStatus = 'active'
+                                `);
+                        }
                     } else {
                         result = await pool.request()
                             .query(`
@@ -240,6 +275,7 @@ class Tool {
             })();
         });
     }
+    
 
     create() {
         return new Promise((resolve, reject) => {
@@ -393,6 +429,73 @@ class Tool {
         });
     }
 
+    update_admin() {
+        // Should be for the admin, so it's possible to change ANY tool!
+        return new Promise((resolve, reject) => {
+            (async () => {
+                try {
+                    const pool = await sql.connect(con);
+                    const result = await pool.request()
+                        .input('toolId', sql.Int(), this.toolId)
+                        .input('toolTitle', sql.NVarChar(50), this.toolTitle)
+                        .input('toolDescription', sql.NVarChar(255), this.toolDescription)
+                        .input('toolLink', sql.NVarChar(255), this.toolLink)
+                        .input('toolCategoryId', sql.Int(), this.toolCategoryId)
+                        // WHERE checks for the toolId, and check if the creator of the tool matches.
+                        .query(`
+                        IF (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxTool t
+                                WHERE t.toolId = @toolId
+                            ))
+                        BEGIN
+                            UPDATE toolboxTool
+                            SET
+                                toolTitle = @toolTitle,
+                                toolDescription = @toolDescription,
+                                toolLink = @toolLink,
+                                FK_categoryId = @toolCategoryId
+                            WHERE toolid = @toolid
+
+                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                            FROM toolboxTool t
+                            JOIN toolboxCategory c
+                                ON t.FK_categoryId = c.categoryId
+                            WHERE t.toolId = @toolId ;
+                        END
+                    `);
+
+                    // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: A tool could not be found with the provided toolId!');
+                    // If recordset is over 1, that means somehow the server created 2 of the same thing.
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when UPDATEing the new Tool!');
+
+                    const
+                    set = result.recordset[0], 
+                    useResult = {
+                        toolId: set.toolId,
+                        toolTitle: set.toolTitle,
+                        toolDescription: set.toolDescription,
+                        toolLink: set.toolLink,
+                        category: {
+                            categoryId: set.categoryId,
+                            categoryName: set.categoryName
+                        }
+                    },
+                    // Is the data we got back from the DB formatted correctly?
+                    { error } = Tool.validate(useResult);
+                    if (error) throw new TakeError(500, 'Internal Server Error: Tool informaion in database is corrupted!');
+            
+                    resolve(useResult);
+                } catch (err) {
+                    reject(err);
+                };
+                sql.close();
+            })();
+        });
+    }
+
     static soft_delete (deleteObj) {
         return new Promise((resolve, reject) => {
             (async () => {
@@ -406,6 +509,7 @@ class Tool {
                         // .input('toolLink', sql.NVarChar(255), this.toolLink)
                         // .input('toolCategoryId', sql.Int(), this.toolCategoryId)
                         // WHERE checks for the toolId, and check if the creator of the tool matches.
+                        // -- If toolStatus is active it will swap to inactive, and reverse.
                         .query(`
                         IF (
                             EXISTS (
@@ -419,7 +523,27 @@ class Tool {
                                toolStatus = 'inactive'
                             WHERE toolid = @toolid ;
 
-                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName, t.toolStatus
+                            FROM toolboxTool t
+                            JOIN toolboxCategory c
+                                ON t.FK_categoryId = c.categoryId
+                            WHERE t.toolId = @toolId ;
+                        END
+                        
+                        ELSE
+                        IF (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxTool t
+                                WHERE t.toolId = @toolId AND t.toolStatus = 'inactive'
+                            ))
+                        BEGIN
+                            UPDATE toolboxTool
+                            SET
+                               toolStatus = 'active'
+                            WHERE toolid = @toolid ;
+
+                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName, t.toolStatus
                             FROM toolboxTool t
                             JOIN toolboxCategory c
                                 ON t.FK_categoryId = c.categoryId
@@ -440,6 +564,7 @@ class Tool {
                         toolTitle: set.toolTitle,
                         toolDescription: set.toolDescription,
                         toolLink: set.toolLink,
+                        toolStatus: set.toolStatus,
                         category: {
                             categoryId: set.categoryId,
                             categoryName: set.categoryName
