@@ -1,5 +1,13 @@
-module.exports = (req, res, next) => {
-    if (req.account.userRole.roleName == 'Admin') next();
+const { TakeError } = require('../helpers/helpError');
+module.exports = async (req, res, next) => {
+    try {
+        if (req.user.userRole.roleName == 'Admin') {
+            next();
+        } {
+            throw new TakeError(401, 'Unauthorised access!');
+        }
+    } catch (err) {
+        next(err);
+    }
 
-    return res.status(401).send(JSON.stringify({ errorMessage: 'Unauthorised access.' }));
 }

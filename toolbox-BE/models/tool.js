@@ -326,6 +326,7 @@ class Tool {
     }
     
     update() {
+        // Should be used for when a member want to change one of the tools created by that specific member!
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
@@ -343,7 +344,7 @@ class Tool {
                             EXISTS (
                                 SELECT *
                                 FROM toolboxTool t
-                                WHERE t.toolId = @toolId
+                                WHERE t.toolId = @toolId AND t.FK_userId = @userId
                             ))
                         BEGIN
                             UPDATE toolboxTool
@@ -364,6 +365,71 @@ class Tool {
 
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
                     if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
+                    // If recordset is over 1, that means somehow the server created 2 of the same thing.
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
+
+                    const
+                    set = result.recordset[0], 
+                    useResult = {
+                        toolId: set.toolId,
+                        toolTitle: set.toolTitle,
+                        toolDescription: set.toolDescription,
+                        toolLink: set.toolLink,
+                        category: {
+                            categoryId: set.categoryId,
+                            categoryName: set.categoryName
+                        }
+                    },
+                    // Is the data we got back from the DB formatted correctly?
+                    { error } = Tool.validate(useResult);
+                    if (error) throw new TakeError(500, 'Internal Server Error: Tool informaion in database is corrupted!');
+            
+                    resolve(useResult);
+                } catch (err) {
+                    reject(err);
+                };
+                sql.close();
+            })();
+        });
+    }
+
+    static soft_delete (deleteObj) {
+        return new Promise((resolve, reject) => {
+            (async () => {
+                try {
+                    const pool = await sql.connect(con);
+                    const result = await pool.request()
+                        // .input('userId', sql.Int(), this.userId)
+                        .input('toolId', sql.Int(), deleteObj)
+                        // .input('toolTitle', sql.NVarChar(50), this.toolTitle)
+                        // .input('toolDescription', sql.NVarChar(255), this.toolDescription)
+                        // .input('toolLink', sql.NVarChar(255), this.toolLink)
+                        // .input('toolCategoryId', sql.Int(), this.toolCategoryId)
+                        // WHERE checks for the toolId, and check if the creator of the tool matches.
+                        .query(`
+                        IF (
+                            EXISTS (
+                                SELECT *
+                                FROM toolboxTool t
+                                WHERE t.toolId = @toolId AND t.toolStatus = 'active'
+                            ))
+                        BEGIN
+                            UPDATE toolboxTool
+                            SET
+                               toolStatus = 'inactive'
+                            WHERE toolid = @toolid ;
+
+                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                            FROM toolboxTool t
+                            JOIN toolboxCategory c
+                                ON t.FK_categoryId = c.categoryId
+                            WHERE t.toolId = @toolId ;
+                        END
+                    `);
+
+                    // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided tool could not be deleted!');
+
                     // If recordset is over 1, that means somehow the server created 2 of the same thing.
                     if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
 
