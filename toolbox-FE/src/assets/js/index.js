@@ -478,7 +478,7 @@ if (myPageMain) {
         console.log(toolToolId)
         const toolTitle = e.target[0].value;
         const toolDescription = e.target[1].value;
-        let toolLink = e.target[2].value;
+        const toolLink = e.target[2].value;
         const toolCategoryId = e.target[3].value;
 
         const pattern = /^((http|https|ftp):\/\/)/;
@@ -516,7 +516,6 @@ if (myPageMain) {
             break;
           case updateTool:
             updateData = {
-              userId: userId,
               toolTitle: toolTitle,
               toolDescription: toolDescription,
               toolLink: toolLink,
@@ -527,8 +526,9 @@ if (myPageMain) {
               submitTool.innerHTML += `<span>Invalid link: add https://</span>`;
               break;
             }
+            console.log(url + toolsEndpoint + userId + "/" + toolToolId)
 
-            fetch(url + toolsEndpoint + toolToolId, {
+            fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",

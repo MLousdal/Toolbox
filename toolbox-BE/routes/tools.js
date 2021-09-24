@@ -158,7 +158,7 @@ router.post('/favorite', async (req, res, next) => {
 //------------------------PUT-------------------------------
 
 //          PUT /api/tools/:userId/:toolID
-router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
+router.put('/:userid/:toolid',  async (req, res, next) => {
     let toolId, userId;
     try {
         // Expected req.body:
