@@ -1,7 +1,0 @@
-@use "../base/variables" as *;
-
-.favorite, .unfavorite {
-  position: absolute;
-  top: $spacing-s;
-  right: $spacing-s;
-}

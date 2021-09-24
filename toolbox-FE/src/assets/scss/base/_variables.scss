@@ -1,31 +1,78 @@
-/* --- Spacing variables --- */
-$spacing-s: 1rem;
-$spacing-xs: calc(#{$spacing-s} * 0.5);
-$spacing-m: calc(#{$spacing-s} * 2);
-$spacing-l: calc(#{$spacing-s} * 4);
-$spacing-xl: calc(#{$spacing-s} * 8);
+// Unit variables 
+$unit-05: 0.5rem;
+$unit-1: 1rem;
+$unit-15: 1.5rem;
+$unit-2: 2rem;
+$unit-25: 2.5rem;
+$unit-3: 3rem;
+$unit-35: 3.5rem;
+$unit-4: 4rem;
+$unit-45: 4.5rem;
+$unit-5: 5rem;
+$unit-55: 5.5rem;
+$unit-6: 6rem;
+$unit-65: 6.5rem;
+$unit-7: 7rem;
+$unit-75: 7.5rem;
+$unit-8: 8rem;
 
-/* --- Border variables --- */
-$border-radius: 5px;
+$layout-spacing: $unit-1;
+$layout-spacing-m: $unit-2;
+$layout-spacing-l: $unit-4;
 
-/* --- Shadows --- */
-$shadow-normal: 0px 6px 10px;
-$shadow-btn: 0px 0px 18px;
+// Border variables 
+$border-width: 1px;
+$border-width-thick: 2px;
+$border-radius: $unit-05;
+$border-radius-s: calc(#{$border-radius} * 0.5);
+$border-radius-l: calc(#{$border-radius} * 1.5);
+$border-radius-o: calc(#{$border-radius} * 100);
 
-/* --- Neutral Colors --- */
-$color-neutral-white: hsl(0, 0%, 100%);
-$color-neutral-lighterxx: hsl(0, 0%, 90%);
-$color-neutral-lighterx: hsl(0, 0%, 80%);
-$color-neutral-lighter: hsl(0, 0%, 60%);
-$color-neutral-light: hsl(0, 0%, 40%);
-$color-neutral-dark: hsl(0, 0%, 20%);
+// Shadows 
+$shadow-offset: 0px 0px;
+$shadow-normal: #{$shadow-offset} 6px 6px;
+$shadow-normal-s: #{$shadow-offset} 3px 3px;
+$shadow-normal-l: #{$shadow-offset} 12px 12px;
 
-/* --- Notification colors --- */
-$color-success: hsl(87, 78%, 55%);
-$color-warning: hsl(47, 78%, 55%);
-$color-error: hsl(7, 78%, 55%);
+//  Neutral colors
+$neutral-100: hsl(0, 0%, 100%);
+$neutral-95: darken($neutral-100, 5%);
+$neutral-90: darken($neutral-100, 10%);
+$neutral-85: darken($neutral-100, 15%);
+$neutral-80: darken($neutral-100, 20%);
+$neutral-75: darken($neutral-100, 25%);
+$neutral-70: darken($neutral-100, 30%);
+$neutral-65: darken($neutral-100, 35%);
+$neutral-60: darken($neutral-100, 40%);
+$neutral-55: darken($neutral-100, 45%);
+$neutral-50: darken($neutral-100, 50%);
+$neutral-45: darken($neutral-100, 55%);
+$neutral-40: darken($neutral-100, 60%);
+$neutral-35: darken($neutral-100, 65%);
+$neutral-30: darken($neutral-100, 70%);
+$neutral-25: darken($neutral-100, 75%);
+$neutral-20: darken($neutral-100, 80%);
+$neutral-15: darken($neutral-100, 85%);
+$neutral-10: darken($neutral-100, 90%);
+$neutral-5: darken($neutral-100, 95%);
+$neutral-0: darken($neutral-100, 100%);
 
-/* Text colors for notifications */
-$font-color-success: hsl(0, 0%, 0%);
-$font-color-warning: hsl(0, 0%, 0%);
-$font-color-error: hsl(0, 0%, 100%);
+$border-color: #{$neutral-35};
+$border-color-dark: #{$neutral-10};
+$border-color-light: #{$neutral-55};
+
+// Notification colors 
+$success-color: hsl(87, 78%, 55%);
+$success-color-dark: hsl(87, 78%, 35%);
+$success-color-light: hsl(87, 78%, 75%);
+$warning-color: hsl(47, 78%, 55%);
+$warning-color-dark: hsl(47, 78%, 35%);
+$warning-color-light: hsl(47, 78%, 75%);
+$error-color: hsl(7, 78%, 55%);
+$error-color-dark: hsl(7, 78%, 35%);
+$error-color-light: hsl(7, 78%, 75%);
+
+// Text colors for notifications
+$success-font-color: hsl(0, 0%, 0%);
+$warning-font-color: hsl(0, 0%, 0%);
+$error-font-color: hsl(0, 0%, 100%);

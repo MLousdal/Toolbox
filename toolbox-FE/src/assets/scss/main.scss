@@ -1,19 +1,5 @@
-@use "./reset/reset";
-@use "./base/variables";
-@use "./base/html";
-@use "./base/utility";
-@use "./base/topography";
-@use "./layout/hero";
-@use "./layout/forms";
-@use "./layout/navbar";
-@use "./layout/toolbox";
-@use "./layout/mypage";
-@use "./modules/arrow";
-@use "./modules/btns";
-@use "./modules/icons";
-@use "./modules/favorite";
-@use "./modules/tool";
-@use "./modules/animation";
-@use "./modules/skeleton";
-@use "./themes/dark";
-@use "./themes/light";
+/*! webTemplate | MIT License | https://github.com/MLousdal/webTemplate */
+@use "base";
+@use "layout";
+@use "module";
+@use "themes";

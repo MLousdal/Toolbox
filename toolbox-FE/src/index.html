@@ -10,13 +10,14 @@
     <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32" />
     <script src="assets/js/index.js" defer="true" type="module"></script>
 </head>
-<body class="theme-light flex gap-flex column-flex">
+<body class="sectionGap">
     <nav>
         <a href="index.html">
             <img src="assets/images/logo.png" alt="logo" class="nav-logo">
         </a>
+        <input type="checkbox" id="themeToggle" aria-label="theme-toggle" class="toggle large">
         <ul id="nav-links">
-            <li><a href="mypage.html" class="underline hide">my page</a></li>
+            <li><a href="mypage.html" class="hide"></a></li>
             <li><a href="forms.html" class="underline">login / signup</a></li>
         </ul>
       </nav>
@@ -31,13 +32,13 @@
     <main class="wrapper toolbox">
         <div class="btn-container">
             <input type="radio" id="design" name="tabs" checked="checked">
-            <label for="design" class="btn">Design</label>
+            <label for="design" class="btn btn-primary" tabinde x="1">Design</label>
             <input type="radio" id="UX" name="tabs">
-            <label for="UX" class="btn">UX</label>
+            <label for="UX" class="btn btn-primary" tabindex="2">UX</label>
             <input type="radio" id="frontend" name="tabs">
-            <label for="frontend" class="btn">frontend</label>
+            <label for="frontend" class="btn btn-primary" tabindex="3">frontend</label>
             <input type="radio" id="backend" name="tabs">
-            <label for="backend" class="btn">backend</label>
+            <label for="backend" class="btn btn-primary" tabindex="4">backend</label>
         </div>
         <section class="tools design">
             <div class="skeleton">

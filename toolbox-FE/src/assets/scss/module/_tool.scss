@@ -5,14 +5,14 @@
   display: flex;
   flex-direction: column;
   background-color: var(--foreground-color);
-  padding: $spacing-m;
+  padding: $unit-15;
   border-radius: $border-radius;
   width: 100%;
-  // max-width: 25em;
   border: 1px solid var(--font-color);
 
-  h4 {
+  h5 {
     white-space: nowrap;
+    overflow-x: hidden;
     text-overflow: ellipsis;
   }
 

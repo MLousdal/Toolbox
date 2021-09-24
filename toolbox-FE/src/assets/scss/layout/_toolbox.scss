@@ -1,29 +1,26 @@
 @use "../base/variables" as *;
 
 .toolbox {
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: $spacing-xs;
-  padding-bottom: $spacing-m;
-
+  gap: $unit-05;
+  padding-bottom: $unit-2;
 
   input[type="radio"] {
     display: none;
   }
 }
 
-  .tools {
-    display: none;
-    width: 100%;
-    grid-template-columns: repeat(3, 1fr);
-    gap: $spacing-s;
-    order: 1;
-    
-
+.tools {
+  display: none;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $unit-1;
+  order: 1;
 
   input[type="radio"]:checked + label {
-    background-color: var(--color-primary);
+    // background-color: var(--color-primary);
   }
 
   input[type="radio"]:checked + label + .tools {

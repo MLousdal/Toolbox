@@ -1,0 +1,11 @@
+@use "../base/variables" as *;
+
+.icon {
+    width: $unit-15;
+    height: $unit-15;
+    filter: var(--filter-gray);
+    
+    &:hover {
+        filter: var(--filter-font-color);
+    }
+}

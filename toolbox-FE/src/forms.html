@@ -10,22 +10,23 @@
     <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32" />
     <script src="assets/js/index.js" defer="true" type="module"></script>
 </head>
-<body class="theme-light">
+<body class="">
   <nav>
     <a href="index.html">
         <img src="assets/images/logo.png" alt="logo" class="nav-logo">
     </a>
+    <input type="checkbox" id="themeToggle" aria-label="theme-toggle" class="toggle large">
     <ul id="nav-links">
-      <li><a href="mypage.html" class="underline hide">my page</a></li>
-      <li><a href="forms.html" class="underline">login / signup</a></li>
-  </ul>
+        <li><a href="mypage.html" class="hide"></a></li>
+        <li><a href="forms.html" class="underline">login / signup</a></li>
+    </ul>
   </nav>
     <main class="forms wrapper">
       <div class="btn-container">
         <button id="login" name="tabs" class="btn active">login</button>
         <button id="signup" name="tabs" class="btn">signup</button>
       </div>
-      <form class="login">
+      <form class="login box">
         <label for="LuserEmail"
           >email:
           <input type="email" id="LuserEmail" name="email" required />
@@ -34,10 +35,10 @@
           >password:
           <input type="password" id="Lpassword" name="password" required />
         </label>
-        <button type="submit" class="btn active" id="loginSubmit">login</button>
-        <div id="Loutput" class="flex align-center"></div>
+        <button type="submit" class="btn btn-primary" id="loginSubmit">login</button>
+        <div id="Loutput" class="flex align-center text-error"></div>
       </form>
-      <form class="signup">
+      <form class="signup box">
         <label for="SUuserName"
           >username:<input type="text" id="SUuserName" name="username" required
         /></label>
@@ -49,8 +50,8 @@
           >password:
           <input type="password" id="SUpassword" name="password" required />
         </label>
-        <button type="submit" class="btn active" id="signupSubmit">signup</button>
-        <div id="SUoutput" class="flex align-center"></div>
+        <button type="submit" class="btn btn-primary" id="signupSubmit">signup</button>
+        <div id="SUoutput" class="flex align-center text-error"></div>
       </form>
     </main>
   </body>
