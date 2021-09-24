@@ -4,6 +4,10 @@ const loginEndpoint = "users/login";
 const signupEndpoint = "users/";
 const toolsEndpoint = "tools/";
 const favoritEndpoint = "favorite/";
+const deleteEndpoint = "delete/";
+const creatorEndpoint = "creator/";
+
+const notifications = document.querySelector(".notifications");
 
 // color scheme check
 const body = document.querySelector("body");
@@ -135,7 +139,7 @@ function removeSkeletons() {
 function favoriteBtn() {
   let allfavoriteBtn = document.querySelectorAll(".favorite");
 
-  if (token) { 
+  if (token) {
     userData = localStorage.getItem("userData");
     userId = JSON.parse(userData).userId;
   }
@@ -162,22 +166,27 @@ function favoriteBtn() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "toolbox-token": localStorage.getItem("toolbox-token"),
         },
         body: JSON.stringify(data),
         signal: controller.signal,
       })
         .then((response) => {
           if (response.status == 409) {
-            document.querySelector(".notifications").innerHTML = `<span class="notification box background-error">Already a favorite</span>`;
-            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+            notifications.innerHTML = `<span class="notification box background-error">Already a favorite</span>`;
+            setTimeout(() => {
+              document.querySelector(".notification").remove();
+            }, 5000);
             controller.abort();
           }
           return response.json();
         })
         .then((data) => {
-          document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully added from favorites</span>`;
-          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
-          favoriteBtn()
+          notifications.innerHTML = `<span class="notification box background-success">Tool was successfully added from favorites</span>`;
+          setTimeout(() => {
+            document.querySelector(".notification").remove();
+          }, 5000);
+          favoriteBtn();
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -198,29 +207,31 @@ function unfavoriteBtn() {
       signal = controller.signal;
       const toolToolId = e.target.parentElement.dataset.id;
 
-        fetch(url + toolsEndpoint + "/" + userId + "/" + toolToolId, {
-          method: "delete",
-          headers: {
-            "Content-Type": "application/json",
-            "toolbox-token": localStorage.getItem("toolbox-token")
-          },
-          signal: controller.signal
+      fetch(url + toolsEndpoint + "/" + userId + "/" + toolToolId, {
+        method: "delete",
+        headers: {
+          "Content-Type": "application/json",
+          "toolbox-token": localStorage.getItem("toolbox-token"),
+        },
+        signal: controller.signal,
+      })
+        .then((response) => {
+          if (response.status == 409) {
+            controller.abort();
+          }
+          return response.json();
         })
-          .then((response) => {
-            if (response.status == 409) {
-              controller.abort();
-            }
-            return response.json();
-          })
-          .then((data) => {
-            e.target.parentElement.remove();
-            document.querySelector(".notifications").innerHTML = `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
-            setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
-            unfavoriteBtn()
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
+        .then((data) => {
+          e.target.parentElement.remove();
+          notifications.innerHTML = `<span class="notification box background-success">Tool was successfully removed from favorites</span>`;
+          setTimeout(() => {
+            document.querySelector(".notification").remove();
+          }, 5000);
+          unfavoriteBtn();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     });
   });
 }
@@ -246,7 +257,7 @@ if (toolbox) {
             <h5>${tool.toolTitle}</h5>
             <p>${tool.toolDescription}</p>
             <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            <input type="image" src="plus.svg" class="favorite icon" />
+            <input type="image" alt="" src="plus.svg" class="favorite icon" />
         </article>
         `;
         switch (tool.category.categoryId) {
@@ -319,16 +330,19 @@ if (forms) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
       },
       body: JSON.stringify(data),
       signal: controller.signal,
     })
       .then((response) => {
         if (response.status !== 200) {
-          document.querySelector(".notifications").innerHTML = `
+          notifications.innerHTML = `
           <span class="notification box background-error">email or password is incorrect</span>
           `;
-          setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
+          setTimeout(() => {
+            document.querySelector(".notification").remove();
+          }, 5000);
           controller.abort();
           loginForm.querySelector(".btn").classList.remove("loading");
         }
@@ -365,17 +379,20 @@ if (forms) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
       },
       body: JSON.stringify(data),
       signal: controller.signal,
     })
       .then((response) => {
         if (response.status !== 200) {
-          document.querySelector(".notifications").innerHTML = `
+          notifications.innerHTML = `
         <span class="notification box background-error">ERROR: Account not created</span>
         `;
-        setTimeout(() => {  document.querySelector(".notification").remove(); }, 5000);
-        controller.abort();
+          setTimeout(() => {
+            document.querySelector(".notification").remove();
+          }, 5000);
+          controller.abort();
         }
         return response.json();
       })
@@ -397,14 +414,14 @@ const myPageMain = document.querySelector("#myPage");
 let toolOptionsArr = [];
 
 function toolOptions() {
-  toolOptionsArr = document.querySelectorAll(".tool");
+  toolOptionsArr = document.querySelectorAll(".tool.withOptions");
 
   if (toolOptionsArr.length > 0) {
     toolOptionsArr.forEach((tool) => {
       const options = tool.querySelector(".options");
       const optionsBtn = tool.querySelector(".optionsBtn");
-      const updateBtn = options.children[0];
-      const deleteBtn = options.children[1];
+      const updateBtn = tool.querySelector(".update");
+      const deleteBtn = tool.querySelector(".delete");
 
       const myPageForms = document.querySelector(".myPageForms");
 
@@ -448,14 +465,35 @@ function toolOptions() {
             updateAllmyPageForms();
             break;
           case deleteBtn:
+            deleteBtn.classList.add("loading");
+
             if (confirm("Are you sure?")) {
-              console.log("send for delete");
-              tool.style.display = "none";
-            } else {
-              console.log("not sure");
+              fetch(url + toolsEndpoint + deleteEndpoint + id, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  "toolbox-token": localStorage.getItem("toolbox-token"),
+                },
+              })
+                .then((response) => {
+                  return response.json();
+                })
+                .then((data) => {
+                  options.classList.toggle("flex");
+                  deleteBtn.classList.remove("loading");
+                  tool.remove();
+                  updateAllmyPageForms();
+                  notifications.innerHTML = `
+                <span class="notification box background-success">Tool successfully deleted</span>
+                `;
+                  setTimeout(() => {
+                    document.querySelector(".notification").remove();
+                  }, 5000);
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
             }
-            options.classList.toggle("flex");
-            updateAllmyPageForms();
             break;
           default:
             break;
@@ -465,6 +503,57 @@ function toolOptions() {
   }
 }
 
+function myPageBtnContainer() {
+  const btnContainer = document.querySelector(".btn-container");
+  let favoriteBtn = "";
+  let favoriteTools = "";
+  const myToolsBtn = document.querySelector("#myToolsBtn");
+  const myToolsSec = document.querySelector(".myToolsSec");
+  const userData = localStorage.getItem("userData");
+  const roleId = JSON.parse(userData).userRole.roleId;
+  let allToolsBtn = "";
+  let allTools = "";
+
+  if (roleId == 1) {
+    allToolsBtn = document.querySelector("#allToolsBtn");
+    allTools = document.querySelector(".tools");
+  }
+
+  if (roleId == 2) {
+    favoriteBtn = document.querySelector("#favoriteToolsBtn");
+    favoriteTools = document.querySelector(".tools");
+  }
+
+  btnContainer.addEventListener("click", (e) => {
+    switch (e.target) {
+      case favoriteBtn:
+        favoriteBtn.classList.add("active");
+        myToolsBtn.classList.remove("active");
+        favoriteTools.style.display = "flex";
+        myToolsSec.style.display = "none";
+        break;
+      case myToolsBtn:
+        if (roleId == 1) {
+          allToolsBtn.classList.remove("active");
+          allTools.style.display = "none";
+        }
+        if (roleId == 2) {
+          favoriteBtn.classList.remove("active");
+          favoriteTools.style.display = "none";
+        }
+        myToolsBtn.classList.add("active");
+        myToolsSec.style.display = "flex";
+        break;
+      case allToolsBtn:
+        myToolsBtn.classList.remove("active");
+        allToolsBtn.classList.add("active");
+        allTools.style.display = "flex";
+        myToolsSec.style.display = "none";
+        break;
+    }
+  });
+}
+
 if (myPageMain) {
   const userData = localStorage.getItem("userData");
   const userName = JSON.parse(userData).userName;
@@ -472,57 +561,74 @@ if (myPageMain) {
   const userRole = JSON.parse(userData)["userRole"].roleId;
 
   let myTools = `
-  <section class="box" id="myTools">
+  <section class="box flex column gap-1" id="myTools">
     <h2>${userName}'s page</h2>
-    <section>
-      <h5>Favorite tools:</h5>
-      <div class="tools">
+    <section class="flex column gap-1">
+    <div class="btn-container">
+      <button id="favoriteToolsBtn" name="tabs" class="active">Favorite Tools</button>
+      <button id="myToolsBtn" name="tabs">My Tools</button>
+    </div>
+    <div class="tools">
       <div class="skeleton">
         <article class="tool"></article>
       </div>
+    </div>
+    <div class="myToolsSec">
+      <div class="skeleton">
+        <article class="tool"></article>
       </div>
-    </section>
-`;
+    </div>
+  </section>
+  `;
   if (userRole == 1) {
     myTools = `
-      <section class="box" id="myTools">
-        <h2>${userName}'s page</h2>
-        <section>
-          <h6>All tools:</h6>
-          <div class="tools">
-          <div class="skeleton">
-            <article class="tool"></article>
-          </div>
-          </div>
-        </section>
+  <section class="box flex column gap-1" id="myTools">
+    <h2>${userName}'s page</h2>
+    <section class="flex column gap-1">
+      <div class="btn-container">
+        <button id="allToolsBtn" name="tabs" class="active">All Tools</button>
+        <button id="myToolsBtn" name="tabs">My Tools</button>
+      </div>
+      <div class="tools">
+        <div class="skeleton">
+          <article class="tool"></article>
+        </div>
+      </div>
+      <div class="myToolsSec">
+        <div class="skeleton">
+          <article class="tool"></article>
+        </div>
+      </div>
+    </section>
+  </section>
   `;
   }
 
   const myPageSubmit = `
   <section class="myPageForms">
-  <form id="submitTool" class="box">
-    <h5>Submit a new tool:</h5>
-    <label for="Stitel">title: 
-      <input type="text" id="Stitel" name="Stitel" required>
-    </label>
-    <label for="Sdesc">description:
-      <textarea id="Sdesc" name="Sdesc" rows="3" required></textarea>
-    </label>
-    <label for="Slink">link: 
-      <input type="url" id="Slink" name="Slink" required pattern="https://.*">
-    </label>
-    <label for="Scategory">category: 
-      <select name="Scategory" id="Scategory" required>
-        <option value="">--Please choose a category --</option>
-        <option value="1">Design</option>
-        <option value="2">UX</option>
-        <option value="3">frontend</option>
-        <option value="4">backend</option>
-    </select>
-    </label>
-    <button class="btn flex align-center" id="SnewTool">submit</button>
-  </form>
-</section>
+    <form id="submitTool" class="box">
+      <h5>Submit a new tool:</h5>
+      <label for="Stitel">title: 
+        <input type="text" id="Stitel" name="Stitel" required>
+      </label>
+      <label for="Sdesc">description:
+        <textarea id="Sdesc" name="Sdesc" rows="3" required></textarea>
+      </label>
+      <label for="Slink">link: 
+        <input type="url" id="Slink" name="Slink" required pattern="https://.*">
+      </label>
+      <label for="Scategory">category: 
+        <select name="Scategory" id="Scategory" required>
+          <option value="">--Please choose a category --</option>
+          <option value="1">Design</option>
+          <option value="2">UX</option>
+          <option value="3">frontend</option>
+          <option value="4">backend</option>
+      </select>
+      </label>
+      <button class="btn flex align-center" id="SnewTool">submit</button>
+    </form>
+  </section>
   `;
   myPageMain.innerHTML += myTools;
   myPageMain.innerHTML += myPageSubmit;
@@ -541,15 +647,15 @@ if (myPageMain) {
         removeSkeletons();
         data.forEach((tool) => {
           const toolHTML = `
-          <article class="tool" data-toolID="${tool.toolId}">
+          <article class="tool withOptions" data-toolID="${tool.toolId}">
               <h5>${tool.toolTitle}</h5>
               <p>${tool.toolDescription}</p>
               <a href="${tool.toolLink}" target="_blank">visit tool..</a>
               <div class="options">
-                <button class="update btn">update</button>
-                <button class="delete btn">delete</button>
+                <button class="update">update</button>
+                <button class="delete">delete</button>
               </div>
-              <input type="image" src="menu.svg" class="optionsBtn icon" />
+              <input type="image" alt="" src="menu.svg" class="optionsBtn icon" />
           </article>
           `;
           myPageTools.innerHTML += toolHTML;
@@ -568,6 +674,10 @@ if (myPageMain) {
   if (userRole == 2) {
     fetch(url + toolsEndpoint + favoritEndpoint + userId, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "toolbox-token": localStorage.getItem("toolbox-token"),
+      },
     })
       .then((response) => {
         return response.json();
@@ -580,7 +690,7 @@ if (myPageMain) {
             <h5>${tool.toolTitle}</h5>
             <p>${tool.toolDescription}</p>
             <a href="${tool.toolLink}" target="_blank">visit tool..</a>
-            <input type="image" src="minus.svg" class="unfavorite icon" />
+            <input type="image" alt="" src="minus.svg" class="unfavorite icon" />
         </article>
         `;
           myPageTools.innerHTML += toolHTML;
@@ -594,6 +704,45 @@ if (myPageMain) {
       `;
       });
   }
+
+  const myToolsSec = document.querySelector(".myToolsSec");
+  fetch(url + toolsEndpoint + creatorEndpoint + userId, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "toolbox-token": localStorage.getItem("toolbox-token"),
+    },
+  })
+    .then((response) => {
+      if (response.status == 400) {
+        myToolsSec.innerHTML = `
+        <span class="flex center-flex">You haven't submitted any tools</span>
+        `;
+      }
+      return response.json();
+    })
+    .then((data) => {
+      data.forEach((tool) => {
+        const toolHTML = `
+        <article class="tool withOptions" data-toolID="${tool.toolId}">
+            <h5>${tool.toolTitle}</h5>
+            <p>${tool.toolDescription}</p>
+            <a href="${tool.toolLink}" target="_blank">visit tool..</a>
+            <div class="options">
+              <button class="update">update</button>
+            </div>
+            <input type="image" alt="" src="menu.svg" class="optionsBtn icon" />
+        </article>
+        `;
+        myToolsSec.innerHTML += toolHTML;
+      });
+      toolOptions();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
+  myPageBtnContainer();
 
   // AllmyPageForms
   function updateAllmyPageForms() {
@@ -628,6 +777,7 @@ if (myPageMain) {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "toolbox-token": localStorage.getItem("toolbox-token"),
               },
               body: JSON.stringify(postData),
             })
@@ -635,17 +785,22 @@ if (myPageMain) {
                 return response.json();
               })
               .then((data) => {
-                console.log(data);
                 submitTool.querySelector(".btn").classList.remove("loading");
-                submitTool.innerHTML += `
-                <span class="text-success text center">Successfully added tool to toolbox!</span>
+                notifications.innerHTML += `
+                <span class="background-success text center box notification">Successfully added tool to toolbox!</span>
                 `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               })
               .catch((error) => {
                 console.error("Error:", error);
-                submitTool.innerHTML += `
-                <span class="text-error text center">Couldn't add tool to toolbox</span>
+                notifications.innerHTML += `
+                <span class="background-error text center box notification">Couldn't add tool to toolbox</span>
                 `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               });
             break;
           case updateTool:
@@ -656,12 +811,11 @@ if (myPageMain) {
               toolCategoryId: toolCategoryId,
             };
 
-            console.log(url + toolsEndpoint + userId + "/" + toolToolId);
-
             fetch(url + toolsEndpoint + userId + "/" + toolToolId, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
+                "toolbox-token": localStorage.getItem("toolbox-token"),
               },
               body: JSON.stringify(updateData),
             })
@@ -669,7 +823,12 @@ if (myPageMain) {
                 return response.json();
               })
               .then((data) => {
-                console.log(data);
+                notifications.innerHTML += `
+                <span class="background-success text center box notification">Successfully updated tool to toolbox!</span>
+                `;
+                setTimeout(() => {
+                  document.querySelector(".notification").remove();
+                }, 5000);
               })
               .catch((error) => {
                 console.error("Error:", error);
