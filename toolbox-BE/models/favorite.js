@@ -93,23 +93,32 @@ con = config.get('dbConfig_UCN'),
                         .input('toolId', sql.Int(), this.toolId)
                         .input('userId', sql.Int(), this.userId)
                         .query(`
-                            INSERT INTO toolboxFavorite
-                                ([FK_userId], [FK_toolId])
-                            VALUES
-                                (@toolId, @userId) ;
-        
-                            SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
-                            FROM toolboxTool t
-                            JOIN toolboxCategory c
-                                ON t.FK_categoryId = c.categoryId
-                            WHERE t.toolId = @toolId ;
+                            IF NOT (
+                                EXISTS (
+                                    SELECT * 
+                                    FROM toolboxFavorite f
+                                    WHERE f.FK_userId = @userId AND f.FK_toolId = @toolId
+                                )
+                            )
+                            BEGIN
+                                INSERT INTO toolboxFavorite
+                                    ([FK_userId], [FK_toolId])
+                                VALUES
+                                    (@userId, @toolId) ;
+            
+                                SELECT t.toolId, t.toolTitle, t.toolDescription, t.toolLink, c.categoryId, c.categoryName
+                                FROM toolboxTool t
+                                JOIN toolboxCategory c
+                                    ON t.FK_categoryId = c.categoryId
+                                WHERE t.toolId = @toolId ;
+                            END
                         `);
-                    console.log(result);
+                    console.log(result.recordset);
         
                     // If recordset is empty it means that the table already exists, so throw and error that says that the user already exist.
-                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided user-email or user-name, are already in use!');
+                    if (result.recordset == undefined) throw new TakeError(409, 'Conflict: The provided favorite Data-combination, are already in use!');
                     // If recordset is over 1, that means somehow the server created 2 of the same thing.
-                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Tool!');
+                    if (result.recordset.length > 1) throw new TakeError(500, 'Internal Server Error: Something went wrong when creating the new Favorite!');
         
                     const
                     set = result.recordset[0], 

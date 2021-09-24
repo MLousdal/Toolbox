@@ -1,3 +1,5 @@
+const { required } = require('joi');
+
 const 
 express = require('express'),
 router = express.Router(),
@@ -13,6 +15,8 @@ auth_member_plus = require('../middleware/member_plus'),
 memberPlus = [auth, auth_member_plus],
 
 // Admin
+auth_admin = require('../middleware/admin'),
+adminAuth = [auth, auth_admin],
 
 
 // Error handler
@@ -152,37 +156,49 @@ router.post('/favorite', async (req, res, next) => {
 
 
 
-//------------------------DELETE-------------------------------
-
-// DELETE NOT USED IN PROJECT
-
-/*   router.delete('/:toolid', async (req, res) => {
-        // › › validate req.params.toolid as toolid
-        // › › call await Tool.delete(req.params.toolid)
-        const { error } = Tool.validate(req.params);
-        if (error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
-
-        try {
-            const tool = await Tool.delete(req.params.toolid);
-            return res.send(JSON.stringify(tool));
-        } catch (err) {
-            return res.status(500).send(JSON.stringify({ errorMessage: err }));
-        }
-    });
-*/
-
-
 //------------------------PUT-------------------------------
 
+//          PUT /api/tools/:userId/:toolID
+router.put('/:userid/:toolid', adminAuth, async (req, res, next) => {
+    let toolId, userId;
+    try {
+        // Expected req.body:
+            // {
+            //     toolTitle: '',
+            //     toolDescription: '',
+            //     toolLink: '',
+            //     toolCategoryId: ''
+            // }
+            // Let's add the userId, and toolId from req.params
+        if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
+            userId = parseInt(req.params.userid);
+            req.body.userId = userId;
+        }
+        if (req.params.toolid) { // Params stores the values from URL segmets like :me as params.me
+            toolId = parseInt(req.params.toolid);
+            req.body.toolId = toolId;
+        }
+        if (!userId) {
+            throw new TakeError(400, 'Bad request: userid = should refer a tools id (integer)');
+        }
+        if (!toolId) {
+            throw new TakeError(400, 'Bad request: toolid = should refer a tools id (integer)');
+        }
 
-//          PUT /api/tools/me/:toolID
+        const 
+        { error } = Tool.validate_tool(req.body);
+        if (error) throw new TakeError(400, 'Bad request: Tool payload formatted incorrectly');
 
-router.put('/me/:toolid', async (req, res) => {
-    // › › validate req.params.toolid as toolid
-    // › › validate req.body (payload) as tool --> authors must have authorid!
-    // › › call tool = await Tool.readById(req.params.toolid)
-    // › › merge / overwrite tool object with req.body
-    // › › call await tool.update() --> tool holds the updated information
+        const 
+        // Update a Tool from the req.body, 
+        // -- and use the .update() to UPDATE DB(If everything checks out)
+        updatedTool = new Tool(req.body),
+        tool = await updatedTool.update();
+        
+        return res.send(JSON.stringify(tool));
+    } catch (err) {
+        next(err);
+    }
     const toolidValidate = Tool.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
@@ -208,6 +224,8 @@ router.put('/:toolid', async (req, res) => {
     // › › call tool = await Tool.readById(req.params.toolid)
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
+
+
     const toolidValidate = Tool.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
