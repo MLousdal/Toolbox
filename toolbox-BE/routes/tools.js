@@ -240,7 +240,6 @@ router.put('/:toolid', async (req, res) => {
     // › › merge / overwrite tool object with req.body
     // › › call await tool.update() --> tool holds the updated information
 
-
     const toolidValidate = Tool.validate(req.params);
     if (toolidValidate.error) return res.status(400).send(JSON.stringify({ errorMessage: 'Bad request: toolid has to be an integer', errorDetail: error.details[0].message }));
 
