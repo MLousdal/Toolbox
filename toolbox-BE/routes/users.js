@@ -30,7 +30,7 @@ adminAuth = [auth, auth_admin],
 // /api/Users
 // /api/Users/login
 
-// GET
+// GET -- Not in use, out of scope.
 // /api/Users
 // /api/Users/me
 // /api/Users/:UserId
@@ -90,48 +90,51 @@ router.post('/login', async (req, res, next) => {
 
 //------------------------ GET -------------------------------
 
-// ----- (ADMIN) GET ALL Users
-router.get('/', async (req, res, next) => {
-    try {
-        const user = await User.readAll();
-        return res.send(JSON.stringify(user));
-    } catch (err) {
-        next(err);
-    }
-});
+// Disclaimer:
+// The scopet changed and more focus was used on our tools, so that is why we are not using these GET's in our project.
 
-// ----- (MEMBER) OWN User
-router.get('/:me', async (req, res, next) => {
-    //URL segmet is :me
-    try {
-        if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
-            me = parseInt(req.params.me);
-            if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+// // ----- (ADMIN) GET ALL Users
+// router.get('/', adminAuth, async (req, res, next) => {
+//     try {
+//         const user = await User.readAll();
+//         return res.send(JSON.stringify(user));
+//     } catch (err) {
+//         next(err);
+//     }
+// });
 
-            const user = await User.readAll(me);
-            return res.send(JSON.stringify(user));
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+// // ----- (MEMBER) OWN User
+// router.get('/:me', memberPlus, async (req, res, next) => {
+//     //URL segmet is :me
+//     try {
+//         if (req.params.me) { // Params stores the values from URL segmets like :me as params.me
+//             me = parseInt(req.params.me);
+//             if (!me) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
 
-// ----- (ADMIN) A specific User
-router.get('/:userid', async (req, res, next) => {
-    //URL segmet is :userid
-    let userid;
-    try {
-        if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
-            userid = parseInt(req.params.userid);
-            if (!userid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+//             const user = await User.readAll(me);
+//             return res.send(JSON.stringify(user));
+//         }
+//     } catch (err) {
+//         next(err);
+//     }
+// });
 
-            const user = await User.readAll(userid);
-            return res.send(JSON.stringify(user));
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+// // ----- (ADMIN) A specific User
+// router.get('/:userid', adminAuth, async (req, res, next) => {
+//     //URL segmet is :userid
+//     let userid;
+//     try {
+//         if (req.params.userid) { // Params stores the values from URL segmets like :me as params.me
+//             userid = parseInt(req.params.userid);
+//             if (!userid) throw new TakeError(400, 'Bad request: me = should refer an user id (integer)');
+
+//             const user = await User.readAll(userid);
+//             return res.send(JSON.stringify(user));
+//         }
+//     } catch (err) {
+//         next(err);
+//     }
+// });
 
 // // ********************************************************
 // // ********************  TEST ROUTE  **********************
