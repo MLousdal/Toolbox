@@ -56,7 +56,7 @@ if (token && token !== null) {
   const logoutBtn = document.querySelector("#logoutBtn");
   logoutBtn.addEventListener("click", () => {
     localStorage.clear();
-    window.location.href = "http://localhost:1234/index.html";
+    window.location.href = "/index.html";
   });
 
   const hero = document.querySelector(".hero");
@@ -355,7 +355,7 @@ if (forms) {
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
         loginForm.querySelector(".btn").classList.remove("loading");
-        window.location.href = "http://localhost:1234/index.html";
+        window.location.href = "/index.html";
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -401,7 +401,7 @@ if (forms) {
       .then((data) => {
         const userData = data;
         localStorage.setItem("userData", JSON.stringify(userData));
-        window.location.href = "http://localhost:1234/forms.html";
+        window.location.href = "/forms.html";
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -765,7 +765,7 @@ if (myPageMain) {
           `;
           myPageTools.innerHTML += toolHTML;
         });
-        toolOptions();
+
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -773,6 +773,7 @@ if (myPageMain) {
         <span class="flex center-flex">You don't have any favorite tools</span>
         `;
       });
+      toolOptions();
   }
 
   // if member get favorite tools
