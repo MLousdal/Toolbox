@@ -19,18 +19,11 @@
   gap: $unit-1;
   order: 1;
 
-  input[type="radio"]:checked + label {
-    // background-color: var(--color-primary);
-  }
-
-  input[type="radio"]:checked + label + .tools {
-    display: grid;
-  }
 }
 
 @media (max-width: 1150px) {
   .toolbox .tools {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 50%);
   }
 }
 

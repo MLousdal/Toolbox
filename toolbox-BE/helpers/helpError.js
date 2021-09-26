@@ -1,4 +1,3 @@
-
 // Heavly inspired by this guide: https://dev.to/nedsoft/central-error-handling-in-express-3aej
 class TakeError extends Error {
     constructor(statusCode, message) {
