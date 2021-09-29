@@ -5,7 +5,8 @@
 ## 👓 Overview
 
 Toolbox is a collection of digital tools used in all aspects of making creating websites. The goal was to have a central hub for collecting the tools that we use when developing, so we could get rid of the haystack that is our browser's bookmarks. The community is the main generator of the content, adding their tools to the toolbox. Toolbox isn't intended to be a one-stop-shop, as none of the tools are hosted here, but as a guidebook to point users in the right direction. 
-<br /><br />Toolbox is a full-stack web app that was developed for the Web API Development elective exam at UCN 2021. 
+<br /><br />Toolbox is a full-stack web app that was developed for the Web API Development elective exam at UCN 2021.
+<br />We recived the grade: 12(A)
 
 ### 🔧 features
 - Every tool is categorized in either design, UX, front-end, or back-end.
@@ -22,7 +23,7 @@ Toolbox is a collection of digital tools used in all aspects of making creating 
 Toolbox is running on a custom API made using SQL, Express, and Node.js.
 <br /> Included is a SQL script to set up the database, and populate it with test data 
 
-### 🗄️ ERD
+### 📊 ERD
 
 ![ERD of Toolbox database](ERD_v3.jpg)
 
@@ -46,8 +47,13 @@ $ npm run build
 $ npm i
 
 👨‍💻 Development
-$ nodemon index.js
+$ node index.js
 ```
+
+## 🚀 Links 
+
+Live Site URL: [Here](https://toolbox-alpha.vercel.app/)
+<br />The current version can't connect to the back-end because it's hosted by our school.
 
 ## 🎫 License
 
