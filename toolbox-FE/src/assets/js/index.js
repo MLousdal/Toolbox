@@ -1,5 +1,5 @@
 // Global variables
-const url = "http://127.0.0.1:8118/api/";
+const url = "mmdwad0920-toolbox.azurewebsites.net/api/";
 const loginEndpoint = "users/login";
 const signupEndpoint = "users/";
 const toolsEndpoint = "tools/";
