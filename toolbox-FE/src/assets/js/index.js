@@ -245,7 +245,6 @@ if (toolbox) {
     method: "GET",
   })
     .then((response) => {
-      console.log("Check Tools Response:",response)
       return response.json();
     })
     .then((data) => {
